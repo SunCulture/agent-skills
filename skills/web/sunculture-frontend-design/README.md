@@ -6,24 +6,22 @@ accessible, mobile-first, and consistent across all SunCulture products.
 ## What it does
 
 When installed, this skill guides your AI coding assistant to apply SunCulture's
-brand system — colours, typography, gradient palette, and design tokens — alongside
-a mobile-first approach, canonical UI patterns, and web interface standards.
+brand system, design tokens, mobile-first approach, canonical UI patterns, and
+web interface standards. The main `SKILL.md` stays concise and points to
+focused one-level reference files for detailed guidance.
+
 Framework-agnostic: applies to any web stack.
 
 ## Contents
 
 ```
 skills/web/sunculture-frontend-design/
-├── SKILL.md                  ← brand, tokens, mobile-first, patterns, standards
+├── SKILL.md                  # activation guidance and quick checklist
 └── references/
-    ├── brand-identity.md     ← brand promise, colour palette, gradients, typography,
-    │                            logo rules, iconography, photography direction
-    ├── design-tokens.md      ← full token values (colours, spacing, typography,
-    │                            radius, sizes) as CSS custom properties + gradients
-    ├── ui-patterns.md        ← forms, confirmation dialogs, data tables, detail pages
-    │                            with tabs, permissions, mobile adaptations
-    └── web-standards.md      ← mobile-first, accessibility, focus states, animation,
-                                 performance, i18n, dark mode, anti-pattern checklist
+    ├── brand-identity.md     # brand promise, colours, typography, logo rules
+    ├── design-tokens.md      # token values and implementation guide
+    ├── ui-patterns.md        # forms, dialogs, tables, detail pages, permissions
+    └── web-standards.md      # mobile, accessibility, animation, performance, i18n
 ```
 
 ## Installation
@@ -43,7 +41,7 @@ Or copy `SKILL.md` and `references/` into your project's
 - Circular Std typography with Arial fallback
 - Logo usage rules (min size, exclusion zone, don'ts)
 - Full design token system as CSS custom properties
-- Validate → confirm → mutate form submission pattern
+- Validate, confirm, mutate form submission pattern
 - Confirmation dialog requirements (title, description, label copy)
 - Data table canonical shape (columns, pagination, mobile card list)
 - Detail pages with typed tab allowlists and URL sync
