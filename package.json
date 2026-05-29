@@ -1,6 +1,6 @@
 {
   "name": "@sunculture/agent-skills",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "A monorepo of agent skills for AI coding assistants at SunCulture",
   "private": true,
   "scripts": {
