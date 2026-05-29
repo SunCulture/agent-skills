@@ -1,562 +1,253 @@
 # SunCulture UI Patterns
 
-Canonical UX patterns for SunCulture web frontends.
-
-Full reference doc: `docs/frontend-ux-standards.md` (AMT frontend)
+Canonical UX patterns for SunCulture web interfaces. Framework-agnostic —
+apply the principles in any stack.
 
 ---
 
-## Forms and modals
+## Mobile-first layout considerations
 
-### Layout
+Every pattern below must work on a 320px–767px viewport first.
 
-Use Ant Design `Form` with `layout="vertical"` and `requiredMark`.
+- Stack form fields vertically on mobile; use multi-column only from `tablet` up.
+- Dialogs/modals: bottom sheet or full-screen on mobile; centred modal from `tablet` up.
+- Tables: card list on mobile; data table from `tablet` up (or use horizontal scroll
+  with `overflow-x: auto` as a minimum).
+- Navigation: bottom-aligned primary actions on mobile; sidebar/top-nav from `tablet` up.
 
-**Validation rules — always explicit, never rely on AntD defaults:**
+---
 
-```tsx
-<Form.Item
-  name="name"
-  label="Name"
-  rules={[
-    { required: true, message: "Name is required." },
-    { whitespace: true, message: "Name cannot be blank." },
-  ]}
->
-  <Input placeholder="e.g. CSD1+RM2S MAX…" />
-</Form.Item>
-```
+## Forms
 
-**Number fields:**
+### Layout rules
 
-```tsx
-<Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
-  <InputNumber min={0} step={0.01} style={{ width: "100%" }} />
-</Form.Item>
-// Before submit: Number(v.amount)
-```
-
-**Remote-data selects:**
-
-```tsx
-<Select
-  showSearch
-  optionFilterProp="label"
-  loading={fetchingOptions}
-  placeholder={fetchingOptions ? "Loading regions…" : "Select a region"}
-  options={regionOptions}
-/>
-```
-
-**Non-obvious fields:** add `extra="..."` below for explanation.
-
-### Modal widths
-
-| Form type                    | Width          |
-| ---------------------------- | -------------- |
-| Compact 3–5 field            | `520` or `560` |
-| Multi-section (e.g. payplan) | `880`          |
-
-Always set `destroyOnClose` when the modal owns transient form state.
-
-### Custom footer (required for all forms)
-
-Never put submit logic on Modal `onOk` when the form requires validation
-or a confirmation step.
-
-```tsx
-<Modal
-  title={title}
-  open={open}
-  onCancel={onClose}
-  width={520}
-  destroyOnClose
-  footer={[
-    <Button key="cancel" onClick={onClose}>
-      Cancel
-    </Button>,
-    <Button
-      key="submit"
-      type="primary"
-      loading={submitting}
-      onClick={() => void handleSubmit()}
-    >
-      {mode === "create" ? "Create" : "Save"}
-    </Button>,
-  ]}
->
-  <Form form={form} layout="vertical" requiredMark>
-    {/* fields */}
-  </Form>
-</Modal>
-```
+- `layout="vertical"` — label above field at all viewports.
+- Explicit, specific validation message on every required field.
+  Never rely on a generic default from a library.
+- Full-width inputs on mobile. Constrain width from `tablet` up where appropriate.
+- Fields with non-obvious meaning: add helper text beneath the input.
+- Remote-data selects: show a loading indicator in the placeholder while data fetches.
+- Number inputs: enforce `min`, `max`, and `step` constraints. Convert to number before submit.
 
 ### Submit flow: validate → confirm → mutate
 
-```tsx
-const handleSubmit = useCallback(async () => {
-  try {
-    const v = await form.validateFields();
+This flow applies to every create, update, and destructive action:
 
-    // 1. Normalise and trim
-    const name = String(v.name).trim();
+```
+1. Validate all fields client-side
+   → surface errors inline, focus the first failing field
+   → abort if any field is invalid
 
-    // 2. Optional pre-checks (duplicates, eligibility)
-    //    e.g. const dupes = await fetchDuplicatesByName(name, v.regionId);
-    //    if (dupes.length) { message.warning(...); return; }
+2. Normalise inputs
+   → trim whitespace from strings
+   → coerce number fields to the correct type
+   → run any optional pre-checks (duplicate name, eligibility)
+   → surface warnings before proceeding
 
-    // 3. Confirm
-    const confirmed = await confirm({
-      title:
-        mode === "create"
-          ? "Create this record?"
-          : "Save changes to this record?",
-      description: (
-        <>
-          You are about to {mode === "create" ? "create" : "update"} &ldquo;
-          {name}&rdquo;. Continue?
-        </>
-      ),
-      confirmLabel: mode === "create" ? "Create" : "Save changes",
-      cancelLabel: "Back to form",
-    });
-    if (!confirmed) return;
+3. Confirm
+   → show a confirmation dialog (see section below)
+   → abort if user cancels
 
-    // 4. Submit
-    setSubmitting(true);
-    try {
-      await save(payload);
-      message.success(
-        mode === "create" ? "Record created." : "Record updated.",
-      );
-      onSuccess();
-      onClose();
-    } catch (err: unknown) {
-      const ax = err as { response?: { data?: { message?: string } } };
-      const serverMsg = ax?.response?.data?.message;
-      message.error(
-        typeof serverMsg === "string" ? serverMsg : "Could not save changes.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  } catch (e) {
-    if (e && typeof e === "object" && "errorFields" in e) return; // AntD validation rejection
-    message.error("Could not save changes.");
-  }
-}, [confirm, form, mode, onClose, onSuccess]);
+4. Mutate
+   → submit to API
+   → show success feedback on completion
+   → show descriptive error feedback on failure (surface server message if available)
+   → never swallow errors silently
 ```
 
 ### Edit-mode initialisation
 
-Single `useEffect` — no split effects for create vs. edit:
+Pre-fill all fields before the form becomes visible — not lazily on open.
+For create mode: reset to empty state and optionally seed contextual defaults
+(e.g. inherit a value from a parent entity).
 
-```tsx
-useEffect(() => {
-  if (!open) return;
-  if (mode === "edit" && record) {
-    form.setFieldsValue({
-      name: record.name,
-      regionId: record.companyRegionId,
-      // …other fields
-    });
-  } else {
-    form.resetFields();
-    // Optionally seed defaults from parent entity:
-    // form.setFieldsValue({ monthlyFee: parentPayplan.installmentAmount });
-  }
-}, [open, mode, record, form]);
-```
+### Dialog / modal guidance
 
-### Reference implementations
-
-| Pattern                | File                                                    |
-| ---------------------- | ------------------------------------------------------- |
-| Create flow            | `src/views/payplans/CreatePayplanModal.tsx`             |
-| Edit flow              | `src/views/payplans/EditPayplanModal.tsx`               |
-| Multi-section form     | `src/views/payplans/payplan-pricing-edit-modal.tsx`     |
-| Lease config modal     | `src/views/payplans/payplan-lease-config-modal.tsx`     |
-| Insurance config modal | `src/views/payplans/payplan-insurance-config-modal.tsx` |
+- Compact form (3–5 fields): `max-width: 520px`; full-screen on mobile.
+- Multi-section form: `max-width: 880px`; full-screen on mobile.
+- Always dismiss and reset state when the dialog closes.
+- On mobile: prefer a bottom sheet that slides up from the screen edge.
+- Primary action button: right-aligned (or full-width on mobile), loading state while submitting.
+- Secondary (cancel) button: left-aligned, always visible.
 
 ---
 
 ## Confirmation dialogs
 
-Source: `src/components/confirm/` — `useConfirm()` hook, `ConfirmDialogProvider`.
-
-`ConfirmDialogProvider` wraps the app in `_app.tsx`. The `useConfirm()` hook
-returns a `Promise<boolean>`.
-
-### Usage
-
-```tsx
-const confirm = useConfirm();
-
-const handleDeactivate = async () => {
-  const ok = await confirm({
-    title: "Deactivate this pay plan?",
-    description: `"${payplan.name}" will be deactivated and customers will
-      no longer be able to enrol. This cannot be undone.`,
-    confirmLabel: "Deactivate",
-    cancelLabel: "Cancel",
-    danger: true,
-  });
-  if (!ok) return;
-  // proceed with deactivation
-};
-```
+Every create / update / destructive / side-effect action requires an explicit
+confirmation step. This is not optional.
 
 ### Copy rules
 
-| Property       | Rule                                                                                    |
-| -------------- | --------------------------------------------------------------------------------------- |
-| `title`        | A clear yes/no question.                                                                |
-| `description`  | Names the entity AND the most consequential change or consequence.                      |
-| `confirmLabel` | Action verb — "Create payplan", "Save changes", "Deactivate". Never "OK".               |
-| `cancelLabel`  | `'Back to form'` when triggered from a form. `'Cancel'` for action buttons.             |
-| `danger`       | `true` for destructive actions: deactivate, delete, repossess, force refresh, ERP sync. |
+| Property      | Rule                                                                   |
+| ------------- | ---------------------------------------------------------------------- |
+| Title         | A clear yes/no question — "Save changes to this pay plan?"             |
+| Description   | Names the entity AND the most consequential values being changed       |
+| Confirm label | Action verb — "Create", "Save changes", "Deactivate". Never "OK"       |
+| Cancel label  | "Back to form" when triggered from a form; "Cancel" for action buttons |
+| Destructive   | Visually distinct — danger colour on the confirm button                |
 
 ### When confirmation is required
 
 - Creating a record.
 - Updating a record.
-- Any destructive action (deactivate, delete, repossess, bulk-change status).
-- Any action with downstream side effects (ERP sync, job queue, SMS dispatch).
+- Any destructive action (deactivate, delete, bulk-change status).
+- Any action with downstream side effects (sync jobs, notifications, financial transactions).
 
-### Do not
+### Mobile presentation
 
-- Use SweetAlert2 (`Swal.fire`) for any new UI.
-- Skip confirmation on destructive actions.
-- The legacy `useConfirmationDialog` hook is being phased out — migrate to
-  `useConfirm()` whenever you touch a component that uses it.
+On narrow viewports, confirmation dialogs should be:
 
-### Reference implementations
+- Full-screen overlay, **or**
+- Bottom sheet anchored to the screen edge
 
-| Pattern                                   | File                                |
-| ----------------------------------------- | ----------------------------------- |
-| Validate → confirm → create               | `CreatePayplanModal.handleSubmit`   |
-| Validate → confirm → update               | `EditPayplanModal.handleSubmit`     |
-| Structured description with entity values | `payplan-pricing-edit-modal.tsx`    |
-| Destructive bulk action                   | `payplan-activations-tab-panel.tsx` |
+Avoid centred floating dialogs on mobile — they compete with the soft keyboard.
 
 ---
 
 ## Data tables (list pages)
 
-Full reference: `.agents/skills/amt-data-table/SKILL.md`
-Live reference: `src/components/dataTable/products.tsx` + `products.module.css`
+### Shell structure
 
-### Required structure
-
-```tsx
-<Card style={dataTableShellStyles.card}>
-  {/* Filters */}
-  <div style={dataTableShellStyles.filterRow}>
-    <div>
-      <Typography.Text
-        type="secondary"
-        style={dataTableShellStyles.filterLabel}
-      >
-        Search
-      </Typography.Text>
-      <Input.Search
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          resetPage();
-        }}
-        style={dataTableShellStyles.searchWrap}
-        placeholder="Search by name…"
-        allowClear
-      />
-    </div>
-    {/* Additional filters follow the same label-above-control pattern */}
-  </div>
-
-  {/* Table */}
-  <Table
-    bordered
-    size="middle"
-    dataSource={records}
-    columns={columns}
-    rowKey="id"
-    loading={loading}
-    pagination={tableProps.pagination}
-    className={styles.table} // scoped CSS module for border overrides
-    scroll={{ x: "max-content" }}
-  />
-</Card>
+```
+┌─ Card / container ──────────────────────────────┐
+│  ┌─ Filter row ─────────────────────────────┐   │
+│  │  [label] [input]  [label] [select]  ...  │   │
+│  └──────────────────────────────────────────┘   │
+│  ┌─ Table ──────────────────────────────────┐   │
+│  │  [view] [ID] [Name] [Status] [Date] ...  │   │
+│  └──────────────────────────────────────────┘   │
+│  ┌─ Pagination ─────────────────────────────┐   │
+└─────────────────────────────────────────────────┘
 ```
 
 ### Column rules
 
-| Column                | Required shape                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **First — view link** | `width: 48`, `fixed: 'left'`, `align: 'center'`. Renders `<EyeOutlined aria-label="View" />` inside `<Link href={...}>`. |
-| **ID**                | `align: 'center'`.                                                                                                       |
-| **Name**              | Clickable `<Link>` to detail page. CSS class `.nameLink` (black text, blue on hover + underline).                        |
-| **Status**            | `<Tag color="success">Active</Tag>` or `<Tag>Inactive</Tag>`.                                                            |
-| **Boolean**           | `record.field ? 'Yes' : 'No'`.                                                                                           |
-| **Missing value**     | `'—'` (em dash). Never blank, never `null`, never `undefined`.                                                           |
-| **Date**              | `width: 160`. `moment(v).isValid() ? moment(v).format('DD MMM YYYY HH:mm') : '—'`.                                       |
+| Column            | Rules                                                    |
+| ----------------- | -------------------------------------------------------- |
+| First — view link | Icon-only, `aria-label="View"`, navigates to detail page |
+| ID / reference    | Centre-aligned                                           |
+| Name / title      | Clickable link to detail page                            |
+| Status            | Badge or tag (success / neutral / danger colour)         |
+| Boolean           | `'Yes'` / `'No'` — never `true`/`false`                  |
+| Missing value     | `'—'` (em dash) — never blank, never `null`              |
+| Date              | `DD MMM YYYY HH:mm` — validate before formatting         |
 
-### CSS module: table border overrides
+### Pagination and filtering
 
-```css
-/* products.module.css pattern */
-.table :global(.ant-table) {
-  border: 1px solid rgba(0, 0, 0, 0.14);
-}
-.table :global(.ant-table-thead > tr > th) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-}
-.nameLink {
-  color: inherit;
-  text-decoration: none;
-}
-.nameLink:hover {
-  color: #1677ff;
-  text-decoration: underline;
-}
-```
+- Server-side pagination — never load all rows client-side.
+- Any filter change resets to page 1.
+- Export always uses the active filter set.
+- Filter state persists in URL query params (deep-linkable).
+- Label each filter control with visible text above it.
 
-### Pagination and filters
+### Mobile table approach
 
-- `useTablePagination` (from `list-query-nav-cache`) for server-side pagination.
-- Any filter change resets pagination to page 1.
-- Export function reuses the active filter set.
-- `useUrlFilters` to persist filters in URL query params.
+On mobile (< 768px), prefer one of:
 
-### Anti-patterns
+1. **Card list** — render each row as a stacked card with key fields visible.
+2. **Horizontal scroll** — `overflow-x: auto` with a minimum column width
+   so the table doesn't collapse illegibly.
+3. **Progressive disclosure** — show key columns only; expand row for details.
 
-- No sticky columns — causes double scrollbars on some browsers.
-  Only `fixed: 'left'` on the first (view-link) column.
-- Do not build tables without `useTablePagination`.
-- Never leave missing values blank — always `'—'`.
-- Never build column layouts without `minWidth: 0` on text-containing flex children.
+Never render a complex multi-column table without any mobile adaptation.
 
 ---
 
 ## Detail pages with tabs
 
-Live reference: `src/pages/payplans/[payplanID]/index.tsx`
+### Page structure
 
-### Page shell
-
-```tsx
-<>
-  <Head>
-    <title>{`${record.name} — SunCulture AMT`}</title>
-  </Head>
-  <div className="container-fluid" style={payplansPageStyles.shell}>
-    <Spin spinning={loading} tip="Loading…">
-      {/* Hero card */}
-      <Card bordered={false} style={detailInfoCardStyles.shellWithBottomGap}>
-        {/* eyebrow label, title, action buttons */}
-      </Card>
-
-      {/* Tabs card */}
-      <Card bordered={false} style={detailInfoCardStyles.shell}>
-        <Tabs
-          activeKey={activeTab}
-          onChange={handleTabChange}
-          items={tabItems}
-          size="large"
-          destroyInactiveTabPane
-        />
-      </Card>
-    </Spin>
-  </div>
-</>
+```
+┌─ Hero section ──────────────────────────┐
+│  [eyebrow] [Title]   [Action buttons]   │
+└─────────────────────────────────────────┘
+┌─ Tab bar ───────────────────────────────┐
+│  [Overview] [Config] [History] ...      │
+└─────────────────────────────────────────┘
+┌─ Tab panel ─────────────────────────────┐
+│  [Loading placeholder]                  │
+│    → [Empty state with next action]     │
+│    → [Content]                          │
+└─────────────────────────────────────────┘
 ```
 
-### Tab key management
+### Tab key rules
 
-Always use a typed allowlist — never trust `router.query.tab` directly.
-
-```tsx
-const PAYPLAN_TAB_KEYS = [
-  "overview",
-  "pricing",
-  "lease",
-  "insurance",
-  "history",
-] as const;
-type PayplanTabKey = (typeof PAYPLAN_TAB_KEYS)[number];
-
-const activeTab = (
-  PAYPLAN_TAB_KEYS.includes(router.query.tab as PayplanTabKey)
-    ? router.query.tab
-    : "overview"
-) as PayplanTabKey;
-
-const handleTabChange = (key: string) => {
-  void router.replace({ query: { ...router.query, tab: key } }, undefined, {
-    shallow: true,
-  });
-};
-```
-
-### Conditional tabs
-
-Add tabs conditionally in `useMemo` and include a deep-link guard:
-
-```tsx
-const tabItems = useMemo<TabsProps['items']>(() => {
-  const items = [
-    { key: 'overview', label: 'Overview', children: <OverviewPanel ... /> },
-    { key: 'pricing',  label: 'Pricing',  children: <PricingPanel  ... /> },
-  ];
-  if (isLeasePayplan) {
-    items.push({ key: 'lease', label: 'Lease Config', children: <LeasePanel ... /> });
-  }
-  return items;
-}, [isLeasePayplan, ...]);
-
-// Deep-link guard: if current tab key is no longer valid, reset to overview
-useEffect(() => {
-  const validKeys = tabItems?.map(t => t.key) ?? [];
-  if (activeTab && !validKeys.includes(activeTab)) {
-    void router.replace({ query: { ...router.query, tab: 'overview' } }, undefined, { shallow: true });
-  }
-}, [activeTab, tabItems]);
-```
+- Define a typed allowlist of valid tab keys.
+- Validate the URL param against the allowlist before applying it.
+- Sync the active tab to the URL — the page must be deep-linkable.
+- Conditional tabs (feature-gated): reset to the default tab when the active
+  key no longer exists for the current entity.
 
 ### Tab panel rules
 
-- Each tab panel is a dedicated component under `src/views/<domain>/`.
-  Never inline a panel directly in the page file.
-- Render order inside a panel:
-  1. Loading placeholder: `<div style={{ minHeight: px(space.xl * 6) }} aria-hidden />`
-  2. Empty state with actionable copy (see below).
-  3. Data / overview content.
+- Each tab panel is a separate, dedicated component — not inlined on the page.
+- Render order inside a panel: loading state → empty state → content.
+- Empty state: name what is missing AND offer a next action (don't just say "No data").
+- On mobile: tabs may collapse into a select/dropdown when there are > 4.
 
-### Reference implementations
+### Mobile detail pages
 
-| Pattern                      | File                                                        |
-| ---------------------------- | ----------------------------------------------------------- |
-| Conditional tabs + URL guard | `src/pages/payplans/[payplanID]/index.tsx`                  |
-| Empty/loaded/edit tab        | `src/views/payplans/payplan-lease-config-tab-panel.tsx`     |
-| Insurance tab                | `src/views/payplans/payplan-insurance-config-tab-panel.tsx` |
+- Hero section stacks vertically on mobile.
+- Action buttons move to a sticky bottom bar or a "…" overflow menu on mobile.
+- Tab bar scrolls horizontally on mobile (no wrapping).
 
 ---
 
 ## Empty states
 
-An empty state must do two things:
+Every empty state must do two things:
 
-1. Name what is missing.
-2. Offer a clear next action.
+1. Name specifically what is missing.
+2. Offer a clear, actionable next step.
 
-```tsx
-<Empty
-  image={Empty.PRESENTED_IMAGE_SIMPLE}
-  description={
-    <span>
-      No lease configuration yet.{" "}
-      {canEdit && <a onClick={openCreateModal}>Set up lease config</a>}
-    </span>
-  }
-/>
+```
+✓ "No lease configuration yet. Set up lease config →"
+✗ "No data."
+✗ Empty component with no text.
 ```
 
-Never render: `<Empty />` with no description, or `<Empty description="No data" />`.
+If the user lacks permission to take the next action, explain why and what
+they can do instead (e.g. "Contact your admin to set this up").
 
 ---
 
 ## Loading and error states
 
-**Loading:** wrap the content area in `<Spin spinning={loading} tip="Loading…">`.
+**Loading:**
 
-**Success:** always call `message.success('...')` after a successful mutation.
+- Show a skeleton or spinner covering the content area.
+- Include a short "Loading…" label for screen readers.
 
-**Error:** always call `message.error('...')` in the catch block. Extract the
-server message when available:
+**Success:**
 
-```tsx
-catch (err: unknown) {
-  const ax = err as { response?: { data?: { message?: string } } };
-  const serverMsg = ax?.response?.data?.message;
-  message.error(typeof serverMsg === 'string' ? serverMsg : 'Could not save changes.');
-}
-```
+- Always show a success notification after a mutation completes.
+- Name the entity that was created/updated in the message.
 
-Never swallow errors silently.
+**Error:**
+
+- Always show an error notification on failure.
+- Surface the server's error message if it is human-readable.
+- Never swallow errors silently.
 
 ---
 
 ## Permissions
 
-### AMT
-
-```tsx
-const { canEdit } = useFeaturePermissions("edit_payplan");
-
-// Hide (don't disable) actions the user can't perform
-{
-  canEdit && (
-    <Button type="primary" onClick={openEditModal}>
-      Edit pay plan
-    </Button>
-  );
-}
-```
-
-- Common permission keys: `edit_payplan`, `edit_product`.
-- Pass `canEdit` down to tab panel components as a prop.
-- The detail page itself (read-only view) stays visible to all authenticated users.
-
-### Mopesa
-
-```tsx
-<PermissionGate permission="expense.create">
-  <Button onClick={openCreateExpenseModal}>New Expense</Button>
-</PermissionGate>
-```
-
-Permission keys follow the domain pattern: `expense.view.own`, `expense.approve`,
-`expense.create`, `budget.view`, `budget.increase.approve`, `payment.process`,
-`user.view`, `role.manage`.
+- **Hide** (don't disable) actions the user cannot perform.
+- The detail page itself (read view) stays visible to read-only users.
+- Check permissions server-side — client-side hiding is UX only, not security.
+- On mobile: hidden actions should not leave empty space — collapse or reflow layout.
 
 ---
 
-## API client conventions (AMT)
+## API conventions
 
-One service file per domain:
-
-- `src/api-client/ProductService.ts` — request functions
-- `src/api-client/ProductService.types.ts` — record and payload types
-
-Key utilities from `@/components/utils/functions`:
-
-| Utility                      | Purpose                                                  |
-| ---------------------------- | -------------------------------------------------------- |
-| `unwrapProductServiceEntity` | Unwraps `{ data: ... }` envelope from entity responses   |
-| `pruneRecord`                | Drops `undefined` values from query param objects        |
-| `coalesceDecimalishNumber`   | Converts Prisma `Decimal` JSON (`{ s, e, d }`) to number |
-
-**Naming + typing pattern:**
-
-```ts
-// ProductService.types.ts
-export interface ProductRecord {
-  id: number;
-  name: string; /* ... */
-}
-export interface CreateProductPayload {
-  name: string;
-  regionId: number; /* ... */
-}
-
-// ProductService.ts
-export const fetchProductById = (id: number) =>
-  api
-    .get<{ data: ProductRecord }>(`/products/${id}`)
-    .then(unwrapProductServiceEntity);
-
-export const createProduct = (payload: CreateProductPayload) =>
-  api.post<ProductRecord>("/products", pruneRecord(payload));
-```
-
-**Wire format:** send `snake_case` if the API uses `snake_case`. Tolerate both
-`snake_case` and `camelCase` in returned types (defensive field accessors).
+- One module per domain: a service file for request functions and a types file
+  for record/payload shapes.
+- Strip `undefined` values from query params before sending.
+- Handle Decimal / JSON numeric types from the API before displaying in UI.
+- Accept both `snake_case` and `camelCase` in response types defensively.
+- Wire format: match what the API uses (usually `snake_case`); normalise
+  to `camelCase` internally after parsing.

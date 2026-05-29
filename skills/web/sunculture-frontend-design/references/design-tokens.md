@@ -1,441 +1,330 @@
 # SunCulture Design Tokens
 
-Source: `src/styles/theme/` in the AMT frontend.
+The SunCulture design token system translates brand values into reusable,
+named constants. Implement these as CSS custom properties in your project.
+Never hardcode raw hex values, raw `px` sizes, or raw font sizes — always
+reference a token.
 
-Always import from `@/styles/theme` — never from individual files inside the
-directory. Never hardcode hex values, raw `px` sizes, or raw font sizes.
+---
 
-```tsx
-import {
-  semanticColors,
-  brandPrimitives,
-  brandGradientSolids,
-  legacyDigital,
-  antdTheme,
-  space,
-  px,
-  pad,
-  inset,
-  fontSize,
-  fontWeight,
-  lineHeight,
-  radii,
-  sizes,
-  dataTableShellStyles,
-  detailInfoCardStyles,
-  navigationStyles,
-  payplansPageStyles,
-  accountActionFormStyles,
-} from "@/styles/theme";
+## Implementing in your project
+
+Declare all tokens as CSS custom properties on `:root`. Your framework or
+component library can then reference them consistently.
+
+```css
+/* globals.css / tokens.css */
+:root {
+  /* --- Colour: Interactive --- */
+  --color-accent: #07b282; /* primary actions, links, active states */
+  --color-accent-muted: #e6f7f2; /* hover / selected surface tint */
+  --color-focus-ring: #07b282; /* keyboard focus ring */
+
+  /* --- Colour: Semantic states --- */
+  --color-success: #62c628;
+  --color-warning: #ff8202;
+  --color-danger: #e23d26;
+  --color-danger-strong: #bf2e1a; /* danger backgrounds, destructive buttons */
+
+  /* --- Colour: Brand primitives --- */
+  --color-brand-teal: #00ccc8;
+  --color-brand-yellow: #f3d500;
+  --color-brand-green: #62c628;
+  --color-brand-orange: #ff8202;
+  --color-brand-red: #e23d26;
+  --color-brand-purple: #9d2aad;
+  --color-brand-warm-grey: #a0918a;
+  --color-brand-grey: #636569;
+
+  /* --- Colour: Surface --- */
+  --color-page-bg: #f7f8fa;
+  --color-surface-elevated: #ffffff;
+  --color-surface-header: #ffffff;
+  --color-surface-dropdown: #ffffff;
+
+  /* --- Colour: Border --- */
+  --color-border-subtle: rgba(0, 0, 0, 0.06);
+  --color-border-default: rgba(0, 0, 0, 0.14);
+  --color-border-hairline: rgba(0, 0, 0, 0.08);
+  --color-border-divider: rgba(0, 0, 0, 0.1);
+
+  /* --- Colour: Text --- */
+  --color-text-primary: #2f313a;
+  --color-text-secondary: #71717a;
+  --color-text-muted: #a0918a;
+  --color-text-heading: #2f313a;
+
+  /* --- Colour: Shadow --- */
+  --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-card-lift: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-table: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+  /* --- Spacing --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-gap-inline: 6px; /* icon-to-text gap */
+  --space-gap-menu: 10px; /* menu item icon gap */
+
+  /* --- Typography --- */
+  --font-family: "Circular Std", Arial, sans-serif;
+  --font-size-xs: 10px; /* fine print, badge counts */
+  --font-size-caption: 11px; /* labels, captions */
+  --font-size-sm: 12px; /* filter labels, helper text */
+  --font-size-base: 13px; /* default body text */
+  --font-size-md: 14px; /* card content, prominent body — mobile minimum */
+  --font-size-lg: 16px; /* section headings, card titles */
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.35;
+  --line-height-normal: 1.5;
+
+  /* --- Border radius --- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-card: 10px;
+
+  /* --- Component sizes --- */
+  --size-touch-min: 44px; /* minimum tap target */
+  --size-header-icon: 18px;
+  --size-avatar: 26px;
+  --size-dropdown-min-width: 200px;
+  --size-detail-intro-max-width: 640px;
+  --size-modal-sm: 520px;
+  --size-modal-md: 720px;
+  --size-modal-lg: 920px;
+}
 ```
 
 ---
 
-## Colour tokens
+## Colour tokens in detail
 
-### Semantic colours (`semanticColors`)
+### Interactive
 
-Use for all new UI. Semantic tokens communicate intent; they map to the correct
-brand colour for the current context.
+| Token                  | Value     | Use                                             |
+| ---------------------- | --------- | ----------------------------------------------- |
+| `--color-accent`       | `#07B282` | Primary buttons, links, focus rings, active nav |
+| `--color-accent-muted` | `#E6F7F2` | Hover / selected background tint                |
+| `--color-focus-ring`   | `#07B282` | `:focus-visible` outline                        |
 
-**Surface:**
+### Semantic states
 
-| Token                             | Use                              |
-| --------------------------------- | -------------------------------- |
-| `semanticColors.surface.header`   | Application header background    |
-| `semanticColors.surface.page`     | Main page background (`#F7F8FA`) |
-| `semanticColors.surface.elevated` | Card and modal backgrounds       |
-| `semanticColors.surface.dropdown` | Dropdown and popover backgrounds |
+| Token                   | Value     | Use                                    |
+| ----------------------- | --------- | -------------------------------------- |
+| `--color-success`       | `#62C628` | Success messages, positive badges      |
+| `--color-warning`       | `#FF8202` | Warning messages, caution badges       |
+| `--color-danger`        | `#E23D26` | Error text, destructive action labels  |
+| `--color-danger-strong` | `#BF2E1A` | Error backgrounds, destructive buttons |
 
-**Border:**
+### Brand primitives
 
-| Token                            | Use                              |
-| -------------------------------- | -------------------------------- |
-| `semanticColors.border.subtle`   | Lightest visible dividers        |
-| `semanticColors.border.default`  | Standard border on inputs, cards |
-| `semanticColors.border.hairline` | Thin 1px rule                    |
-| `semanticColors.border.divider`  | Section separators               |
+Use for gradient blocks, hero sections, and marketing moments — not routine
+interactive UI.
 
-**Text:**
-
-| Token                               | Use                         |
-| ----------------------------------- | --------------------------- |
-| `semanticColors.text.primary`       | Main body text              |
-| `semanticColors.text.secondary`     | Supporting / secondary text |
-| `semanticColors.text.iconMuted`     | Muted icon colour           |
-| `semanticColors.text.heading`       | Page and card headings      |
-| `semanticColors.text.bodySecondary` | Inline secondary body copy  |
-
-**Semantic states:**
-
-| Token                                  | Use                                           |
-| -------------------------------------- | --------------------------------------------- |
-| `semanticColors.semantic.danger`       | Error text, destructive labels                |
-| `semanticColors.semantic.dangerStrong` | Error backgrounds, destructive action buttons |
-
-**Interaction:**
-
-| Token                                           | Use                                                   |
-| ----------------------------------------------- | ----------------------------------------------------- |
-| `semanticColors.interaction.accent`             | Primary actions, links, active indicators (`#07B082`) |
-| `semanticColors.interaction.accentMutedSurface` | Hover / selected surface tint                         |
-| `semanticColors.interaction.accentFocusRing`    | Focus ring colour                                     |
-
-**Shadow:**
-
-| Token                              | Use                         |
-| ---------------------------------- | --------------------------- |
-| `semanticColors.shadow.dropdown`   | Dropdown / popover shadow   |
-| `semanticColors.shadow.cardLift`   | Hovered card elevation      |
-| `semanticColors.shadow.tableShell` | Data table container shadow |
-
-**Avatar:**
-
-- `semanticColors.avatar.accentPalette` — array of background colours for
-  user avatar initials.
+| Token                     | Hex       |
+| ------------------------- | --------- |
+| `--color-brand-teal`      | `#00CCC8` |
+| `--color-brand-yellow`    | `#F3D500` |
+| `--color-brand-green`     | `#62C628` |
+| `--color-brand-orange`    | `#FF8202` |
+| `--color-brand-red`       | `#E23D26` |
+| `--color-brand-purple`    | `#9D2AAD` |
+| `--color-brand-warm-grey` | `#A0918A` |
 
 ---
 
-### Brand primitives (`brandPrimitives`)
+## Gradients
 
-Use for intentional brand moments — gradient blocks, branded illustrations,
-hero sections, marketing-aligned UI. Not for routine interactive UI.
+Three canonical gradient sweeps. All start from yellow — the brand's unifying
+warm energy point. Use as full-bleed colour blocks or multiply-blended over
+photography. Never apply gradients to body text.
 
-```ts
-brandPrimitives.yellow; // #F3D500
-brandPrimitives.green; // #62C628
-brandPrimitives.blue; // #00CCC8  (brand teal)
-brandPrimitives.warmGrey; // #A0918A
-brandPrimitives.orange; // #FF8202
-brandPrimitives.red; // #E23D26
-brandPrimitives.purple; // #9D2AAD
-brandPrimitives.grey; // #636569
-brandPrimitives.white; // #FFFFFF
+```css
+.gradient-warm {
+  background: linear-gradient(135deg, #f3d500, #ff5c00, #df180d);
+}
+.gradient-brand {
+  background: linear-gradient(135deg, #f3d500, #55cc2e, #00c7f7);
+}
+.gradient-vibrant {
+  background: linear-gradient(135deg, #f3d500, #e83a7b, #c800ff);
+}
 ```
+
+| Name       | From             | Via              | To               |
+| ---------- | ---------------- | ---------------- | ---------------- |
+| Warm       | Yellow `#F3D500` | Orange `#FF5C00` | Red `#DF180D`    |
+| Core brand | Yellow `#F3D500` | Lime `#55CC2E`   | Blue `#00C7F7`   |
+| Vibrant    | Yellow `#F3D500` | Pink `#E83A7B`   | Purple `#C800FF` |
 
 ---
 
-### Gradient endpoint solids (`brandGradientSolids`)
+## Spacing
 
-Mid-point and end colours for the three canonical brand gradients.
+Scale based on a 4px base unit. Use tokens consistently — avoid one-off values.
 
-```ts
-brandGradientSolids.orange; // #FF5C00  (warm gradient: yellow → orange → red)
-brandGradientSolids.red; // #DF180D
-brandGradientSolids.limeGreen; // #55CC2E  (core brand: yellow → lime → blue)
-brandGradientSolids.blue; // #00C7F7
-brandGradientSolids.pink; // #E83A7B  (vibrant: yellow → pink → purple)
-brandGradientSolids.purple; // #C800FF
-```
-
-**Constructing gradients in code:**
-
-```ts
-// Core brand gradient
-`linear-gradient(135deg,
-  ${brandPrimitives.yellow},
-  ${brandGradientSolids.limeGreen},
-  ${brandGradientSolids.blue})`
-// Warm gradient
-`linear-gradient(135deg,
-  ${brandPrimitives.yellow},
-  ${brandGradientSolids.orange},
-  ${brandGradientSolids.red})`
-// Vibrant gradient
-`linear-gradient(135deg,
-  ${brandPrimitives.yellow},
-  ${brandGradientSolids.pink},
-  ${brandGradientSolids.purple})`;
-```
-
----
-
-### Legacy digital (`legacyDigital`)
-
-Read-only. For understanding existing component values. Migrate away from
-`legacyDigital.*` to `semanticColors.*` when you touch a component.
-
-```ts
-legacyDigital.tealPrimary; // #07B282  (was the interactive accent)
-legacyDigital.pageBg; // #F7F8FA
-legacyDigital.charcoal; // #2F313A
-legacyDigital.cyan; // #02C7F1
-legacyDigital.navyDark; // #252543
-legacyDigital.zinc; // #71717a
-```
-
----
-
-### Ant Design theme (`antdTheme`)
-
-Passed once to `<ConfigProvider theme={antdTheme}>` at the app root.
-Never nest multiple `ConfigProvider` components.
-
-| Key            | Value     | Meaning                              |
-| -------------- | --------- | ------------------------------------ |
-| `colorPrimary` | `#07B082` | Teal — primary actions, focus, links |
-| `colorSuccess` | `#62C628` | Green — success states               |
-| `colorWarning` | `#FF8202` | Orange — warning states              |
-| `colorError`   | `#DF180D` | Red — error states                   |
-
----
-
-## Spacing (`space`)
-
-```ts
-space.xxs; // 4px
-space.xs; // 8px
-space.sm; // 12px
-space.md; // 16px
-space.lg; // 24px
-space.xl; // 32px
-space.gapInline; // 6px   — icon-to-text gap in buttons/labels
-space.gapMenuIcon; // 10px  — menu item icon gap
-```
-
-### Spacing helpers
-
-```ts
-px(space.md); // '16px'
-pad(space.xs, space.md); // '8px 16px'   (vertical, horizontal)
-inset(8, 16, 8, 16); // '8px 16px 8px 16px'  (top, right, bottom, left)
-```
+| Token       | Value | Common use                               |
+| ----------- | ----- | ---------------------------------------- |
+| `--space-1` | 4px   | Icon gap, tight internal spacing         |
+| `--space-2` | 8px   | Small padding, gap between related items |
+| `--space-3` | 12px  | Input padding, compact card spacing      |
+| `--space-4` | 16px  | Default section padding, card inner      |
+| `--space-6` | 24px  | Between sections, generous card padding  |
+| `--space-8` | 32px  | Page-level breathing room                |
 
 ---
 
 ## Typography
 
-### Font size scale (`fontSize`)
+### Circular Std loading
 
-All values are numbers (not strings). Pass to `fontSize: fontSize.body` in
-style objects, or use with `px()` for CSS strings.
-
-```ts
-fontSize.micro; // 10  — fine print, badge counts
-fontSize.caption; // 11  — labels, captions, timestamps
-fontSize.bodySmall; // 12  — filter labels, helper text, secondary
-fontSize.body; // 13  — default body text
-fontSize.bodyLarge; // 14  — card content, prominent body
-fontSize.titleSmall; // 16  — section headings, card titles
-```
-
-### Font weight (`fontWeight`)
-
-```ts
-fontWeight.normal; // 400 — Circular Std Book
-fontWeight.medium; // 500 — Circular Std Medium
-fontWeight.semibold; // 600 — labels, button text
-fontWeight.bold; // 700 — Circular Std Bold
-```
-
-### Line height (`lineHeight`)
-
-```ts
-lineHeight.tight; // 1.2  — compact headings
-lineHeight.snug; // 1.35 — subheadings
-lineHeight.normal; // 1.5  — body text
-```
-
----
-
-## Border radius (`radii`)
-
-```ts
-radii.sm; // 6px  — small UI elements (tags, badges)
-radii.md; // 8px  — inputs, buttons
-radii.lg; // 12px — larger cards, panels
-radii.cardShell; // 10px — card containers
-```
-
----
-
-## Sizes (`sizes`)
-
-Fixed dimension values for common UI elements.
-
-```ts
-sizes.headerIcon; // 18px — navigation header icons
-sizes.caretIcon; // 10px — dropdown caret icons
-sizes.avatarHeader; // 26px — header avatar circle
-sizes.avatarInitialsFont; // 11px — font size inside avatar
-sizes.dropdownMinWidth; // 200px — minimum dropdown/select width
-sizes.emailPreviewMaxWidth; // 120px — email preview truncation width
-sizes.filterSelectSm; // 160px — small filter select width
-sizes.filterSelectMd; // 192px — medium filter select width
-sizes.filterSelectLg; // 224px — large filter select width
-sizes.detailIntroMaxWidth; // 640px — max width for intro/hero text blocks
-// Commission modals
-sizes.commissionModalSm; // 560px
-sizes.commissionModalMd; // 720px
-sizes.commissionModalLg; // 920px
-```
-
----
-
-## Presets
-
-Presets are style-object bundles for common layout patterns. Import and spread
-them into component styles rather than rebuilding from scratch.
-
-### `dataTableShellStyles` — list page shell
-
-```tsx
-<Card style={dataTableShellStyles.card}>
-  <div style={dataTableShellStyles.filterRow}>
-    <div>
-      <Typography.Text
-        type="secondary"
-        style={dataTableShellStyles.filterLabel}
-      >
-        Search
-      </Typography.Text>
-      <Input.Search ... style={dataTableShellStyles.searchWrap} />
-    </div>
-  </div>
-  <div style={dataTableShellStyles.tableWrap}>
-    <Table ... />
-  </div>
-</Card>
-```
-
-| Key              | Purpose                                        |
-| ---------------- | ---------------------------------------------- |
-| `.card`          | Outer Card container (shadow, radius, padding) |
-| `.filterRow`     | Horizontal filter controls layout              |
-| `.filterLabel`   | 12px secondary label above each filter         |
-| `.searchWrap`    | Search input sizing                            |
-| `.tableWrap`     | Table container (overflow, padding)            |
-| `.rowActionLink` | Inline row action link style                   |
-
-### `detailInfoCardStyles` — detail page cards
-
-```tsx
-{/* Hero card — with margin below */}
-<Card bordered={false} style={detailInfoCardStyles.shellWithBottomGap}>
-  {/* title, eyebrow, action buttons */}
-</Card>
-
-{/* Tabs card — flush to bottom */}
-<Card bordered={false} style={detailInfoCardStyles.shell}>
-  <Tabs ... />
-</Card>
-```
-
-### `navigationStyles` — app header
-
-| Key               | Purpose                       |
-| ----------------- | ----------------------------- |
-| `.pageHeaderRow`  | Outer header row layout       |
-| `.headerToolsRow` | Right-side tools area         |
-| `.profileTrigger` | Avatar / profile click target |
-| `.profileName`    | User name text in header      |
-| `.profileEmail`   | User email text in header     |
-| `.dropdownPanel`  | Profile dropdown container    |
-| `.breadcrumb`     | Breadcrumb trail              |
-| `.regionSwitcher` | Region selector button        |
-
-### `payplansPageStyles` — pay plan list page
-
-Pre-built layout for the pay plans index page structure. Extend or reference
-when building similar product-domain list pages.
-
-### `accountActionFormStyles` — action modals
-
-Style preset for modal forms that perform account actions (status changes,
-overrides, admin operations).
-
----
-
-## CSS custom properties (`css-vars.css`)
-
-`src/styles/theme/css-vars.css` mirrors semantic tokens as `:root` CSS
-variables. Import in `_app.tsx` when Bootstrap components need access to
-brand colours.
+Load via your framework's font loading mechanism. Always provide Arial as
+fallback to maintain brand character when the custom font is unavailable.
 
 ```css
-:root {
-  --color-accent: #07b082;
-  --color-page-bg: #f7f8fa;
-  --color-border-default: /* ... */;
-  --color-text-primary: /* ... */;
+@font-face {
+  font-family: "Circular Std";
+  src: url("/fonts/CircularStd-Book.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
 }
-```
-
----
-
-## Mopesa / TailwindCSS + shadcn/ui mapping
-
-Mopesa uses TailwindCSS 4.x + shadcn/ui. Brand colours live as CSS variables.
-
-### `app/globals.css`
-
-```css
-:root {
-  --sunculture-teal: #07b282;
-  --sunculture-teal-light: #00ccc8;
-  --sunculture-yellow: #f3d500;
-  --sunculture-green: #62c628;
-  --sunculture-orange: #ff8202;
-  --sunculture-red: #e23d26;
-  --sunculture-charcoal: #2f313a;
-  --sunculture-page-bg: #f7f8fa;
+@font-face {
+  font-family: "Circular Std";
+  src: url("/fonts/CircularStd-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
 }
-```
+@font-face {
+  font-family: "Circular Std";
+  src: url("/fonts/CircularStd-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
 
-### `tailwind.config.ts`
-
-```ts
-theme: {
-  extend: {
-    colors: {
-      'sc-teal':    'var(--sunculture-teal)',
-      'sc-yellow':  'var(--sunculture-yellow)',
-      'sc-green':   'var(--sunculture-green)',
-      'sc-orange':  'var(--sunculture-orange)',
-      'sc-red':     'var(--sunculture-red)',
-    },
-  },
-},
-```
-
-### Circular Std via `next/font/local`
-
-```ts
-import localFont from "next/font/local";
-
-export const circularStd = localFont({
-  src: [
-    {
-      path: "../assets/fonts/CircularStd-Book.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../assets/fonts/CircularStd-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../assets/fonts/CircularStd-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-circular",
-  display: "swap",
-  fallback: ["Arial", "sans-serif"],
-});
-```
-
-Apply in `app/layout.tsx`:
-
-```tsx
-<html className={circularStd.variable}>
-```
-
-```css
-/* globals.css */
 body {
-  font-family: var(--font-circular), Arial, sans-serif;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+}
+```
+
+### Size scale
+
+| Token                 | Value | Use                                           |
+| --------------------- | ----- | --------------------------------------------- |
+| `--font-size-xs`      | 10px  | Fine print, badge counts                      |
+| `--font-size-caption` | 11px  | Labels, timestamps, captions                  |
+| `--font-size-sm`      | 12px  | Filter labels, helper text, secondary UI      |
+| `--font-size-base`    | 13px  | Default body text                             |
+| `--font-size-md`      | 14px  | Card content, prominent body — mobile minimum |
+| `--font-size-lg`      | 16px  | Section headings, card titles                 |
+
+**Mobile floor:** never render text below `14px` on mobile viewports.
+
+### Weight usage
+
+| Weight   | Value | Use                            |
+| -------- | ----- | ------------------------------ |
+| Normal   | 400   | Body copy, field values        |
+| Medium   | 500   | Subheadings, navigation labels |
+| Semibold | 600   | Button text, table headers     |
+| Bold     | 700   | Display headings, hero copy    |
+
+---
+
+## Border radius
+
+| Token           | Value | Use                          |
+| --------------- | ----- | ---------------------------- |
+| `--radius-sm`   | 6px   | Tags, badges, small chips    |
+| `--radius-md`   | 8px   | Inputs, buttons              |
+| `--radius-lg`   | 12px  | Larger panels, sheet headers |
+| `--radius-card` | 10px  | Card containers              |
+
+---
+
+## Component sizes
+
+| Token                           | Value | Use                             |
+| ------------------------------- | ----- | ------------------------------- |
+| `--size-touch-min`              | 44px  | Minimum tap target height/width |
+| `--size-header-icon`            | 18px  | Navigation icons                |
+| `--size-avatar`                 | 26px  | Header user avatar              |
+| `--size-dropdown-min-width`     | 200px | Select / dropdown minimum width |
+| `--size-detail-intro-max-width` | 640px | Hero/intro text block max-width |
+| `--size-modal-sm`               | 520px | Compact form dialogs            |
+| `--size-modal-md`               | 720px | Standard multi-field dialogs    |
+| `--size-modal-lg`               | 920px | Multi-section / wide dialogs    |
+
+---
+
+## Common layout patterns
+
+Rather than library-specific presets, implement these as reusable CSS classes
+or framework components in your project.
+
+### Page shell
+
+```css
+.page-shell {
+  background: var(--color-page-bg);
+  min-height: 100vh;
+  padding: var(--space-4);
+}
+@media (min-width: 768px) {
+  .page-shell {
+    padding: var(--space-6);
+  }
+}
+```
+
+### Card
+
+```css
+.card {
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card-lift);
+  padding: var(--space-4);
+}
+@media (min-width: 768px) {
+  .card {
+    padding: var(--space-6);
+  }
+}
+```
+
+### Filter row (data table shell)
+
+```css
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+@media (min-width: 768px) {
+  .filter-row {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.filter-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
 }
 ```

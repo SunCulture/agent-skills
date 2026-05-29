@@ -1,21 +1,20 @@
 ---
 name: sunculture-frontend-design
 description: >
-  Apply SunCulture brand guidelines, design tokens, and UX patterns when
-  building or reviewing web interfaces for SunCulture products (AMT frontend,
-  Mopesa frontend, or any new SunCulture web surface). Covers the teal/green/
-  yellow colour system and gradient palette, Circular Std typography, logo
-  usage rules, semantic design tokens (@/styles/theme in AMT; TailwindCSS +
-  shadcn/ui in Mopesa), SunCulture voice and copy rules (UK spelling, pragmatic
-  idealism, benefit-led), and canonical UI patterns: forms (validate → confirm
-  → mutate), confirmation dialogs (useConfirm), data tables (products.tsx
-  pattern), detail pages with tabs, and permission-gated actions. Use when
-  styling a component, reviewing code for brand alignment, writing UI copy, or
-  building any new page or feature on a SunCulture product.
+  Apply SunCulture brand guidelines, design system, and UX patterns when
+  building web interfaces. Covers the teal/green/yellow colour system and
+  gradient palette, Circular Std typography, logo rules, the full design token
+  system (colours, spacing, typography, radius), voice and copy rules (UK
+  spelling, pragmatic idealism, benefit-led), a mobile-first layout approach,
+  and core UI patterns: forms (validate → confirm → mutate), confirmation
+  dialogs, data tables, and detail pages with tabs. Also enforces web interface
+  standards for accessibility, focus states, animation, and performance. Use
+  when styling a component, reviewing UI for brand alignment, writing UI copy,
+  or building any new SunCulture web interface — regardless of framework.
 license: MIT
 metadata:
   author: sunculture
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # SunCulture Frontend Design
@@ -23,13 +22,80 @@ metadata:
 > Source of truth for brand identity, design tokens, UI patterns, and web
 > interface standards across all SunCulture web products.
 >
-> Brand PDF: `docs/SunCulture_Brand_Guidelines.pdf`
-> AMT UX standards: `docs/frontend-ux-standards.md`
-> AMT theme tokens: `src/styles/theme/`
+> Full brand spec: `references/brand-identity.md`
+> Design token values: `references/design-tokens.md`
 
 ---
 
-## 1. Brand identity at a glance
+## 1. Mobile-first approach
+
+Design and build for the smallest screen first, then progressively enhance
+for larger viewports. This is a hard requirement — not a preference.
+
+### Core rule
+
+Write your base styles for mobile. Use `min-width` media queries to add
+complexity at larger sizes. Never start from desktop and subtract.
+
+```css
+/* base — mobile */
+.card {
+  padding: 16px;
+  flex-direction: column;
+}
+
+/* tablet and up */
+@media (min-width: 768px) {
+  .card {
+    flex-direction: row;
+  }
+}
+
+/* desktop and up */
+@media (min-width: 1280px) {
+  .card {
+    padding: 24px;
+  }
+}
+```
+
+### Breakpoints
+
+| Name    | Min-width | Target                    |
+| ------- | --------- | ------------------------- |
+| mobile  | —         | Default, 320px–767px      |
+| tablet  | `768px`   | iPad, small laptop        |
+| desktop | `1280px`  | Standard laptop/desktop   |
+| wide    | `1536px`  | Large monitor / dashboard |
+
+### Touch and interaction
+
+- Minimum touch target size: **44×44px** for any tappable element.
+- Use `touch-action: manipulation` to remove the 300ms tap delay.
+- Place primary actions in the **lower half** of the screen (thumb-reachable).
+- Avoid hover-only affordances — mobile has no hover state.
+- Test navigation and modals with a real mobile device or emulator before shipping.
+
+### Layout
+
+- Stack content vertically on mobile. Use grid/flex rows only from `tablet` up.
+- Fluid widths (`%`, `fr`, `min()`) over fixed `px` widths where possible.
+- Minimum readable font size: **14px** on mobile (never scale below this).
+- Generous line-height (`1.5`) on body text for mobile readability.
+- Avoid horizontal scrollbars — `overflow-x: hidden` on the page root.
+- Full-bleed sections on mobile; add max-width containers from `tablet` up.
+
+### Forms on mobile
+
+- Full-width inputs on mobile (`width: 100%`).
+- Stack label above input — never inline at small sizes.
+- Use the correct `type` and `inputmode` to trigger the right soft keyboard.
+- Confirm dialogs should be full-screen sheets or bottom drawers on mobile,
+  not centred desktop-style modals.
+
+---
+
+## 2. Brand identity at a glance
 
 **Brand promise:** Life-changing technology for everyday challenges.
 
@@ -37,21 +103,21 @@ metadata:
 Visionary + Collaborative (partner, not leader).
 
 **Aesthetic direction:** Clean, optimistic, energetic. White backgrounds with
-vivid teal/green/yellow accents and gradient moments. Not corporate, not stark
-— warm and accessible with genuine confidence.
+vivid teal/green/yellow accents and gradient moments. Warm and accessible with
+genuine confidence — not corporate, not stark.
 
 ### Colour
 
-| Token                     | Hex       | Use                                                                         |
-| ------------------------- | --------- | --------------------------------------------------------------------------- |
-| Interactive accent (teal) | `#07B282` | Primary actions, links, active states — `semanticColors.interaction.accent` |
-| Brand teal                | `#00CCC8` | Brand headers, hero moments — `brandPrimitives.blue`                        |
-| Yellow                    | `#F3D500` | Brand accent, gradient start — `brandPrimitives.yellow`                     |
-| Green                     | `#62C628` | Success, positive states — `brandPrimitives.green`                          |
-| Orange                    | `#FF8202` | Warning, energetic accent — `brandPrimitives.orange`                        |
-| Red                       | `#E23D26` | Danger, error — `brandPrimitives.red`                                       |
-| Charcoal                  | `#2F313A` | Body text, dark elements — `legacyDigital.charcoal`                         |
-| Page background           | `#F7F8FA` | Page bg — `legacyDigital.pageBg` / `semanticColors.surface.page`            |
+| Role               | Hex       | Use                                   |
+| ------------------ | --------- | ------------------------------------- |
+| Interactive accent | `#07B282` | Primary actions, links, active states |
+| Brand teal         | `#00CCC8` | Brand headers, hero moments           |
+| Yellow             | `#F3D500` | Brand accent, gradient start          |
+| Green              | `#62C628` | Success, positive states              |
+| Orange             | `#FF8202` | Warning, energetic accent             |
+| Red                | `#E23D26` | Danger, error                         |
+| Charcoal           | `#2F313A` | Body text, dark elements              |
+| Page background    | `#F7F8FA` | Page / surface background             |
 
 **Gradients** — three canonical sweeps. Use as solid colour blocks or
 multiply-blended over hero images. Never on body text.
@@ -66,20 +132,18 @@ multiply-blended over hero images. Never on body text.
 
 **Primary font:** Circular Std — Book (400), Medium (500), Bold (700).
 Round letterforms complement the circle logo. Friendly, clean, professional.
+**Fallback:** Arial.
 
-**System fallback:** Arial.
+**Never use** Inter, Roboto, Space Grotesk, or system-ui as the primary font.
 
-**Never use** Inter, Roboto, Space Grotesk, or system-ui as the primary font
-on any SunCulture-branded surface.
-
-| Token                 | Size | Use                           |
-| --------------------- | ---- | ----------------------------- |
-| `fontSize.micro`      | 10px | Fine print, badge counts      |
-| `fontSize.caption`    | 11px | Labels, captions              |
-| `fontSize.bodySmall`  | 12px | Filter labels, helper text    |
-| `fontSize.body`       | 13px | Default body text             |
-| `fontSize.bodyLarge`  | 14px | Card content, prominent body  |
-| `fontSize.titleSmall` | 16px | Section headings, card titles |
+| Scale       | Size | Use                                           |
+| ----------- | ---- | --------------------------------------------- |
+| Micro       | 10px | Fine print, badge counts                      |
+| Caption     | 11px | Labels, captions                              |
+| Body small  | 12px | Filter labels, helper text                    |
+| Body        | 13px | Default body text                             |
+| Body large  | 14px | Card content, prominent body — mobile minimum |
+| Title small | 16px | Section headings, card titles                 |
 
 ### Logo rules (quick)
 
@@ -90,82 +154,75 @@ on any SunCulture-branded surface.
 
 ---
 
-## 2. Design tokens by app
+## 3. Design tokens
 
-### AMT frontend (Next.js + Ant Design)
-
-Always import from `@/styles/theme`. Never use raw hex values, raw px sizes,
-or raw font sizes in JSX or inline styles.
-
-```tsx
-import {
-  semanticColors,
-  brandPrimitives,
-  space,
-  px,
-  pad,
-  inset,
-  fontSize,
-  fontWeight,
-  lineHeight,
-  radii,
-  sizes,
-  dataTableShellStyles,
-  detailInfoCardStyles,
-  navigationStyles,
-  accountActionFormStyles,
-} from "@/styles/theme";
-```
-
-**Colour hierarchy:**
-
-- New UI → `semanticColors.*` (preferred)
-- Intentional brand moments → `brandPrimitives.*`
-- Legacy `legacyDigital.*` → migrate to semantic tokens when you touch the component
-
-**Spacing:**
-
-```tsx
-space.xs; // 8    space.sm  // 12
-space.md; // 16   space.lg  // 24   space.xl  // 32
-px(space.md); // '16px'
-pad(space.xs, space.md); // '8px 16px'
-```
-
-**Presets — use before rolling your own:**
-
-| Preset                                    | Use for                                |
-| ----------------------------------------- | -------------------------------------- |
-| `dataTableShellStyles`                    | List pages with Card + filters + Table |
-| `detailInfoCardStyles.shellWithBottomGap` | Hero card on detail pages              |
-| `detailInfoCardStyles.shell`              | Tabs card on detail pages              |
-| `navigationStyles`                        | Header, profile dropdown, breadcrumbs  |
-| `accountActionFormStyles`                 | Action modals                          |
-
-If a style repeats 2+ times in a feature, move it to a preset under
-`src/styles/theme/presets/`.
-
-### Mopesa frontend (Next.js + TailwindCSS + shadcn/ui)
-
-Map brand colours to CSS variables in `app/globals.css`:
+The SunCulture design system is defined as a set of named token values.
+Implement them as CSS custom properties in your project and reference them
+throughout your styles. Never hardcode raw hex values, raw `px` sizes, or raw
+font sizes — always use a token.
 
 ```css
 :root {
-  --sunculture-teal: #07b282;
-  --sunculture-yellow: #f3d500;
-  --sunculture-green: #62c628;
-  --sunculture-orange: #ff8202;
+  /* Colour — interactive */
+  --color-accent: #07b282;
+  --color-accent-muted: #e6f7f2;
+  --color-focus-ring: #07b282;
+
+  /* Colour — semantic */
+  --color-success: #62c628;
+  --color-warning: #ff8202;
+  --color-danger: #e23d26;
+
+  /* Colour — brand primitives */
+  --color-brand-teal: #00ccc8;
+  --color-brand-yellow: #f3d500;
+  --color-brand-green: #62c628;
+  --color-brand-orange: #ff8202;
+  --color-brand-red: #e23d26;
+
+  /* Colour — surface */
+  --color-page-bg: #f7f8fa;
+  --color-surface-elevated: #ffffff;
+  --color-text-primary: #2f313a;
+  --color-text-secondary: #71717a;
+  --color-border-default: rgba(0, 0, 0, 0.14);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Typography */
+  --font-family: "Circular Std", Arial, sans-serif;
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-card: 10px;
 }
 ```
 
-Extend `tailwind.config.ts` with `colors: { 'sc-teal': 'var(--sunculture-teal)', ... }`.
+Full token reference (all values, gradient construction, spacing helpers):
+`references/design-tokens.md`
 
-Load Circular Std via `next/font/local` with Arial fallback.
-All files must be kebab-case (Mopesa project convention).
+**Colour hierarchy in practice:**
+
+1. Semantic/functional tokens (`--color-accent`, `--color-danger`) for UI states
+2. Brand primitives (`--color-brand-*`) for intentional brand moments and gradients
+3. Surface and text tokens for backgrounds, borders, and copy
 
 ---
 
-## 3. Voice and copy rules
+## 4. Voice and copy rules
 
 SunCulture uses **UK spelling**. Tone: benefit-led, grounded, human. Never corporate.
 
@@ -185,120 +242,114 @@ SunCulture uses **UK spelling**. Tone: benefit-led, grounded, human. Never corpo
 - **Errors:** explain what went wrong + what to do next.
 - **Confirmation title:** clear yes/no question — "Save changes to this pay plan?"
 - **Confirmation description:** name the entity + most consequential values.
-- **Button labels:** action verbs — "Create payplan", "Deactivate". Never "OK".
-- **Date format:** `DD MMM YYYY HH:mm`. Guard with `moment(iso).isValid()`.
+- **Button labels:** action verbs — "Create", "Save changes", "Deactivate". Never "OK".
+- **Date format:** `DD MMM YYYY HH:mm`. Always validate before formatting.
 - **Empty cell value:** `'—'` (em dash). Never blank.
 - **Loading states:** end with `…` — "Saving…", "Loading…"
 - **Numbers:** numerals — "3 accounts", not "three accounts".
 
 ---
 
-## 4. Core UI patterns
+## 5. Core UI patterns
 
-Full code shapes → `references/ui-patterns.md`
+Full framework-agnostic code shapes → `references/ui-patterns.md`
 
-### Forms and modals
+### Forms
 
-- `Form layout="vertical"` with `requiredMark`. Explicit `rules` on every field.
-- **Custom footer** — never submit logic on Modal `onOk`.
-- **Submit flow:** `validateFields()` → normalise → pre-checks → `useConfirm()` → mutate.
-- Modal width: 520–560 for compact; 880 for multi-section.
-- Always `destroyOnClose` when modal owns transient form state.
-- Edit init: single `useEffect` on `[open, mode, record, form]`.
+- Labels above fields — never inline at any viewport.
+- Explicit validation message on every required field — never rely on browser/library defaults.
+- Full-width inputs on mobile; constrain width only from `tablet` up.
+- **Submit flow:** validate fields → normalise → optional pre-checks → confirm → mutate.
+- Never submit on Enter without explicit confirmation for destructive or irreversible actions.
+- Edit-mode init: pre-fill all fields before the form becomes visible.
 
 ### Confirmation dialogs
 
-Use `useConfirm()` from `@/components/confirm`:
+Every create / update / destructive / side-effect action requires confirmation.
 
-```tsx
-const confirmed = await confirm({
-  title: "Save changes to this pay plan?",
-  description: `You are about to update "${name}". Continue?`,
-  confirmLabel: "Save changes",
-  cancelLabel: "Back to form",
-});
-if (!confirmed) return;
-```
-
-- Required for all create / update / destructive / side-effect actions.
-- `danger: true` for destructive actions.
-- `cancelLabel: 'Back to form'` for form confirmations; `'Cancel'` for action buttons.
-- **Never** use SweetAlert2 (`Swal.fire`) for new UI.
+- **Title:** a clear yes/no question.
+- **Description:** names the entity AND the most consequential values being changed.
+- **Confirm label:** action verb — "Create", "Save changes", "Deactivate". Never "OK".
+- **Cancel label:** "Back to form" when triggered from a form; "Cancel" for action buttons.
+- Destructive actions: visually distinct (danger colour on confirm button).
+- On mobile: use a bottom sheet or full-screen dialog, not a centred modal.
 
 ### Data tables
 
-- `<Table bordered size="middle" />` + scoped CSS module border overrides.
-- First column: `EyeOutlined` view link — `width: 48`, `fixed: 'left'`, `align: 'center'`, `aria-label`.
-- `useTablePagination` for server-side pagination.
-- Status: `<Tag>`. Booleans: `'Yes'`/`'No'`. Missing: `'—'`.
-- Date columns: width 160, `moment()` formatted with `.isValid()` guard.
-- Filter labels: `fontSize.bodySmall` `Typography.Text type="secondary"` above each filter.
-- Any filter change resets pagination to page 1. No sticky columns.
+- Server-side pagination — never load all rows at once.
+- First column: icon-only view link with `aria-label`.
+- Status: badge/tag (success / neutral). Booleans: `'Yes'` / `'No'`. Missing values: `'—'`.
+- Date columns: consistent `DD MMM YYYY HH:mm` format. Validate before formatting.
+- Filter labels visible above each filter control.
+- Any filter change resets pagination to page 1.
+- On mobile: consider a card list instead of a scrolling table.
 
 ### Detail pages
 
-- Hero card (`detailInfoCardStyles.shellWithBottomGap`) + tabs card (`detailInfoCardStyles.shell`).
-- Typed tab key allowlist; URL sync via `router.replace({...}, undefined, { shallow: true })`.
-- Conditional tabs: reset to `overview` when active key is invalid for the current entity.
-- Tab panel: dedicated component under `src/views/<domain>/`.
-- Panel render order: loading placeholder → empty state → data.
+- Hero section + tabbed content panels.
+- Typed tab key allowlist — validate URL param before applying.
+- URL reflects active tab (deep-linkable).
+- Conditional tabs: reset to default tab when the active key is no longer valid.
+- Tab panel render order: loading → empty state (actionable) → data.
 
 ### Permissions
 
-- AMT: `useFeaturePermissions('feature_key')` → `canEdit` boolean.
-- Mopesa: `<PermissionGate permission="expense.create">`.
-- **Hide** (don't disable) actions when `!canEdit`.
+- **Hide** (don't disable) actions the user cannot perform.
+- The detail page (read view) stays accessible to read-only users.
+- Always check permissions server-side — client-side hiding is UX only.
 
 ---
 
-## 5. Accessibility essentials
+## 6. Accessibility essentials
 
-- `<button>` for actions, `<a>`/`<Link>` for navigation. Never `<div onClick>`.
+- `<button>` for actions, `<a>` for navigation. Never `<div onClick>`.
 - Icon-only buttons: `aria-label`. Decorative icons: `aria-hidden="true"`.
-- Form fields: `<label>` (or `aria-label`) + explicit validation messages.
-- Async updates: `aria-live="polite"`.
-- Never `outline: none` without a `focus-visible` ring replacement.
-- Ant Design icons on Next.js 15: add `onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}`.
-- Images: `alt`, explicit `width` + `height`. Below-fold: `loading="lazy"`. Above-fold: `priority`.
+- Form fields: visible `<label>` + explicit error messages.
+- Async updates (toasts, validation): `aria-live="polite"`.
+- Never `outline: none` without a `:focus-visible` ring replacement.
+- Images: `alt`, explicit `width` + `height`.
+  Below-fold: `loading="lazy"`. Above-fold: `fetchpriority="high"`.
+- Don't communicate state with colour alone — pair with text or icon.
 
 ---
 
-## 6. Performance
+## 7. Performance
 
 - Virtualise lists > 50 items.
-- `loading="lazy"` on below-fold images; `priority` on above-fold.
 - Animate only `transform` / `opacity`. Never `transition: all`.
 - Respect `prefers-reduced-motion`.
-- URL reflects state: filters, tabs, pagination — use URL sync, not just local state.
+- URL reflects state: filters, tabs, pagination — sync to URL, not just local state.
 - `font-display: swap`; preload critical fonts.
+- Optimise images: explicit dimensions, `loading="lazy"` below the fold, correct `sizes`.
 
 ---
 
-## 7. Anti-patterns
+## 8. Anti-patterns
 
-| Anti-pattern                             | Instead                                         |
-| ---------------------------------------- | ----------------------------------------------- |
-| Raw hex in JSX/CSS                       | `semanticColors.*` / `brandPrimitives.*` tokens |
-| Raw `fontSize: 12`, raw `padding: '8px'` | `fontSize.*`, `space.*`, `px()`, `pad()`        |
-| Inter / Roboto / Space Grotesk           | Circular Std / Arial                            |
-| `Swal.fire(...)`                         | `useConfirm()`                                  |
-| Modal `onOk` for form submit             | Custom footer pattern                           |
-| Sticky table columns                     | `fixed: 'left'` on first column only            |
-| "No data." empty state                   | Actionable empty state with context             |
-| Silent async failures                    | `message.success()` + `message.error()`         |
-| `[...map.values()]` spread               | `Array.from(map.values())`                      |
-| `user-scalable=no` in viewport           | Remove — breaks a11y zoom                       |
-| `onPaste` with `preventDefault`          | Never block paste                               |
-| Hardcoded date formats                   | `moment()` / `Intl.DateTimeFormat`              |
-| `outline: none` without focus ring       | Add `:focus-visible` ring                       |
+| Anti-pattern                              | Instead                                            |
+| ----------------------------------------- | -------------------------------------------------- |
+| Raw hex colours in styles                 | Design token CSS variables                         |
+| Raw `font-size: 12px`, raw padding        | Token variables (`--font-size-sm`, `--space-3`)    |
+| Inter / Roboto / Space Grotesk            | Circular Std / Arial                               |
+| Desktop-first layout                      | Mobile-first with `min-width` queries              |
+| Touch targets under 44px                  | Minimum 44×44px                                    |
+| Hover-only affordances                    | Always provide a visible/tap-accessible equivalent |
+| Confirming nothing on destructive actions | Confirmation dialog, always                        |
+| Sticky table columns beyond first         | Use first column only                              |
+| "No data." empty state                    | Actionable empty state with context                |
+| Silent async failures                     | Always surface success / error feedback            |
+| `user-scalable=no` in viewport            | Remove — breaks accessibility zoom                 |
+| Blocking paste (`onPaste preventDefault`) | Never block paste                                  |
+| Hardcoded date format strings             | Use a date library with locale support             |
+| `outline: none` without focus ring        | Add `:focus-visible` ring                          |
 
 ---
 
 ## References
 
-| Topic                                                                            | File                           |
-| -------------------------------------------------------------------------------- | ------------------------------ |
-| Full brand spec — colours, gradients, typography, logo, iconography, photography | `references/brand-identity.md` |
-| AMT design tokens — full mapping, presets, CSS vars, Mopesa/Tailwind mapping     | `references/design-tokens.md`  |
-| UI patterns — forms, modals, tables, detail pages, confirmation, permissions     | `references/ui-patterns.md`    |
-| Web standards — accessibility, animation, performance, copy, i18n, dark mode     | `references/web-standards.md`  |
+| Topic                                                                             | File                           |
+| --------------------------------------------------------------------------------- | ------------------------------ |
+| Full brand spec — colours, gradients, typography, logo, iconography, photography  | `references/brand-identity.md` |
+| Design token values — colours, spacing, typography, radius + implementation guide | `references/design-tokens.md`  |
+| UI patterns — forms, confirmation, data tables, detail pages, permissions         | `references/ui-patterns.md`    |
+| Web standards — accessibility, animation, performance, copy, i18n, mobile         | `references/web-standards.md`  |

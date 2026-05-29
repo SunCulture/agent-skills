@@ -9,35 +9,37 @@ Claude Code, Cursor, Copilot, and other AI coding agents.
 
 ## Available Skills
 
-### typescript / functional-typescript
+### `typescript/`
 
-Helps write idiomatic functional TypeScript and JavaScript. Covers closures,
-partial application, currying, pure functions, immutability, higher-order
-functions, function composition, and the module pattern — grounded in _You
-Don't Know JS Yet_ foundations with TypeScript type system coverage.
+#### `functional-typescript` · [view](https://github.com/SunCulture/agent-skills/tree/main/skills/typescript/functional-typescript)
 
-**Use when:**
+Functional programming patterns for TypeScript and JavaScript — pure functions,
+immutability, closures, currying, partial application, higher-order functions,
+function composition, and the module pattern.
 
-- Writing functional-style TypeScript or JavaScript
-- Typing higher-order functions, curried functions, or generics
-- Structuring code with the module pattern
-- Avoiding mutation and side effects
-- Understanding closures and scope
+**Use when** writing functional-style TypeScript, typing HOFs or curried
+functions, structuring code with the module pattern, or avoiding mutation and
+side effects.
 
-### web / sunculture-frontend-design
+```bash
+npx skills add https://github.com/SunCulture/agent-skills --skill functional-typescript
+```
 
-Applies SunCulture brand guidelines, design tokens, and UX patterns when
-building or reviewing web interfaces. Covers the teal/green/yellow colour
-system, Circular Std typography, canonical gradient system, AMT design tokens
-(`@/styles/theme`), Mopesa/TailwindCSS mapping, SunCulture voice and copy
-rules, and UI patterns (forms, tables, detail pages, confirmation dialogs).
+### `web/`
 
-**Use when:**
+#### `sunculture-frontend-design` · [view](https://github.com/SunCulture/agent-skills/tree/main/skills/web/sunculture-frontend-design)
 
-- Styling a component or page on AMT or Mopesa frontend
-- Reviewing code for brand alignment
-- Writing UI copy for any SunCulture surface
-- Building a new feature on a SunCulture product
+SunCulture brand guidelines, design tokens, mobile-first approach, and UX
+patterns for web interfaces. Covers the teal/green/yellow colour system,
+Circular Std typography, full token system as CSS custom properties, and
+canonical patterns for forms, data tables, detail pages, and confirmation dialogs.
+
+**Use when** building or reviewing any SunCulture web interface, writing UI
+copy, or checking a component for brand alignment.
+
+```bash
+npx skills add https://github.com/SunCulture/agent-skills --skill sunculture-frontend-design
+```
 
 ## Skill Structure
 

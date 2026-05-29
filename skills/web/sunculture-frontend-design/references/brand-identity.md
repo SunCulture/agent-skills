@@ -109,12 +109,12 @@ background: linear-gradient(135deg, #f3d500, #e83a7b, #c800ff);
 - Gradient blocks can stand alone without photography — this creates variation
   and visual pace across communications.
 
-### Digital semantic tokens
+### Design tokens
 
-For all new AMT frontend UI, use `semanticColors.*` instead of brand primitives
-or legacy hex values. Full token documentation: `references/design-tokens.md`.
+Implement brand colours as CSS custom properties in your project — never
+hardcode raw hex values. Full token documentation: `references/design-tokens.md`.
 
-Key interaction colour: `semanticColors.interaction.accent` = `#07B082` (teal).
+Primary interactive colour: `#07B282` (teal) — maps to `--color-accent`.
 
 ---
 
@@ -208,10 +208,11 @@ The SunCulture icon set uses a consistent outline style that echoes the logo:
 
 When adding functional UI icons (not marketing assets):
 
-- Use Ant Design icons (AMT) or Lucide icons (Mopesa) for standard UI actions.
+- Use your project's icon library for standard UI actions (e.g. Ant Design icons,
+  Lucide, Heroicons) — choose based on project conventions.
 - Ensure icon style is consistent with surrounding UI — thin outline icons work
   best; avoid filled/solid styles that clash with the brand outline system.
-- Icons in the SunCulture brand style should use teal `semanticColors.interaction.accent`.
+- Icons in the SunCulture brand style should use teal `#07B282` (`--color-accent`).
 
 ---
 
