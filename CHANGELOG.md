@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/SunCulture/agent-skills/compare/v1.0.0...v1.0.1) (2026-05-29)
+
+### Code Refactoring
+
+- **sunculture-frontend-design:** make skill framework-agnostic, add mobile-first ([427170a](https://github.com/SunCulture/agent-skills/commit/427170a6d4fb9cbccc0f6b1694e8317f5ba42a22))
+
 ## 1.0.0 (2026-05-29)
 
 ### Features
