@@ -41,6 +41,23 @@ copy, or checking a component for brand alignment.
 npx skills add https://github.com/SunCulture/agent-skills --skill sunculture-frontend-design
 ```
 
+### `devops/`
+
+#### `deslop-and-review` · [view](https://github.com/SunCulture/agent-skills/tree/main/skills/devops/deslop-and-review)
+
+Clean up AI-generated code slop and run a rigorous agent code review on the
+current branch or pull request. Combines the public deslop workflow from
+[skills.sh](https://www.skills.sh/?q=deslop) with structured review for
+correctness, security, test coverage, maintainability, and performance.
+
+**Use when** cleaning up AI-generated changes before a PR, reviewing
+agent-written code, preparing a branch for human review, or running deslop and
+code review together.
+
+```bash
+npx skills add https://github.com/SunCulture/agent-skills --skill deslop-and-review
+```
+
 ## Skill Structure
 
 Skills are organised by category. Each skill lives under `skills/{category}/`
