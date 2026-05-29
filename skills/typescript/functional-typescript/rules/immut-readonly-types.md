@@ -15,7 +15,7 @@ Annotating function parameters with `Readonly<T>` and `readonly T[]` (or `Readon
 
 ```typescript
 function sortByName(users: User[]): User[] {
-  return users.sort((a, b) => a.name.localeCompare(b.name))
+  return users.sort((a, b) => a.name.localeCompare(b.name));
   // Array.sort mutates in place — caller's array is now sorted too!
 }
 ```
@@ -24,7 +24,7 @@ function sortByName(users: User[]): User[] {
 
 ```typescript
 function sortByName(users: readonly User[]): User[] {
-  return [...users].sort((a, b) => a.name.localeCompare(b.name))
+  return [...users].sort((a, b) => a.name.localeCompare(b.name));
   // Forced to copy first — original is untouched
 }
 ```
@@ -33,8 +33,8 @@ function sortByName(users: readonly User[]): User[] {
 
 ```typescript
 function formatAddress(address: Address): string {
-  address.country = address.country.toUpperCase() // accidental mutation
-  return `${address.street}, ${address.city}, ${address.country}`
+  address.country = address.country.toUpperCase(); // accidental mutation
+  return `${address.street}, ${address.city}, ${address.country}`;
 }
 ```
 
@@ -43,7 +43,7 @@ function formatAddress(address: Address): string {
 ```typescript
 function formatAddress(address: Readonly<Address>): string {
   // address.country = ... // TS error: Cannot assign to 'country' (readonly)
-  return `${address.street}, ${address.city}, ${address.country.toUpperCase()}`
+  return `${address.street}, ${address.city}, ${address.country.toUpperCase()}`;
 }
 ```
 
@@ -51,14 +51,14 @@ function formatAddress(address: Readonly<Address>): string {
 
 ```typescript
 // Utility type alias for clarity
-type Pure<T> = Readonly<T>
-type PureArray<T> = ReadonlyArray<T>
+type Pure<T> = Readonly<T>;
+type PureArray<T> = ReadonlyArray<T>;
 
 function processItems(
   items: PureArray<Item>,
-  config: Pure<ProcessConfig>
+  config: Pure<ProcessConfig>,
 ): ProcessedItem[] {
-  return items.map(item => transform(item, config))
+  return items.map((item) => transform(item, config));
 }
 ```
 
@@ -66,10 +66,10 @@ function processItems(
 
 ```typescript
 function getDefaults(): Readonly<Config> {
-  return { host: 'localhost', port: 3000, debug: false }
+  return { host: "localhost", port: 3000, debug: false };
 }
 
-const defaults = getDefaults()
+const defaults = getDefaults();
 // defaults.port = 4000 // TS error
 ```
 

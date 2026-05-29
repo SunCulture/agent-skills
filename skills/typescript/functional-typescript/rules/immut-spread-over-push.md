@@ -14,61 +14,61 @@ The most common source of accidental mutation in JavaScript is the array methods
 **Incorrect vs Correct — quick reference:**
 
 ```typescript
-const xs = [3, 1, 2]
+const xs = [3, 1, 2];
 
 // Append
-xs.push(4)                       // mutates ❌
-const appended = [...xs, 4]      // new array ✓
+xs.push(4); // mutates ❌
+const appended = [...xs, 4]; // new array ✓
 
 // Prepend
-xs.unshift(0)                    // mutates ❌
-const prepended = [0, ...xs]     // new array ✓
+xs.unshift(0); // mutates ❌
+const prepended = [0, ...xs]; // new array ✓
 
 // Remove by index
-xs.splice(1, 1)                  // mutates ❌
-const removed = xs.filter((_, i) => i !== 1) // new array ✓
+xs.splice(1, 1); // mutates ❌
+const removed = xs.filter((_, i) => i !== 1); // new array ✓
 
 // Replace by index
-xs[1] = 99                       // mutates ❌
-const replaced = xs.map((x, i) => i === 1 ? 99 : x) // new array ✓
+xs[1] = 99; // mutates ❌
+const replaced = xs.map((x, i) => (i === 1 ? 99 : x)); // new array ✓
 
 // Sort
-xs.sort()                        // mutates ❌
-const sorted = [...xs].sort()    // new array ✓
+xs.sort(); // mutates ❌
+const sorted = [...xs].sort(); // new array ✓
 // or (ES2023):
-const sorted2 = xs.toSorted()   // new array ✓
+const sorted2 = xs.toSorted(); // new array ✓
 
 // Reverse
-xs.reverse()                     // mutates ❌
-const reversed = [...xs].reverse() // new array ✓
+xs.reverse(); // mutates ❌
+const reversed = [...xs].reverse(); // new array ✓
 // or (ES2023):
-const reversed2 = xs.toReversed() // new array ✓
+const reversed2 = xs.toReversed(); // new array ✓
 ```
 
 **Real-world example — shopping cart:**
 
 ```typescript
-type CartItem = { id: string; qty: number }
+type CartItem = { id: string; qty: number };
 
 // Incorrect — all three operations mutate the cart array
 function addToCart(cart: CartItem[], item: CartItem): CartItem[] {
-  const existing = cart.find(i => i.id === item.id)
+  const existing = cart.find((i) => i.id === item.id);
   if (existing) {
-    existing.qty += item.qty // mutates object
+    existing.qty += item.qty; // mutates object
   } else {
-    cart.push(item)          // mutates array
+    cart.push(item); // mutates array
   }
-  cart.sort((a, b) => a.id.localeCompare(b.id)) // mutates array
-  return cart
+  cart.sort((a, b) => a.id.localeCompare(b.id)); // mutates array
+  return cart;
 }
 
 // Correct — returns new structures at every step
 function addToCart(cart: readonly CartItem[], item: CartItem): CartItem[] {
-  const exists = cart.some(i => i.id === item.id)
+  const exists = cart.some((i) => i.id === item.id);
   const updated = exists
-    ? cart.map(i => i.id === item.id ? { ...i, qty: i.qty + item.qty } : i)
-    : [...cart, item]
-  return updated.toSorted((a, b) => a.id.localeCompare(b.id))
+    ? cart.map((i) => (i.id === item.id ? { ...i, qty: i.qty + item.qty } : i))
+    : [...cart, item];
+  return updated.toSorted((a, b) => a.id.localeCompare(b.id));
 }
 ```
 

@@ -12,26 +12,30 @@ directory under `skills/` with a `SKILL.md` and optional `references/`,
 
 ### Directory Structure
 
+Skills are organised by category under `skills/`. Each category gets its own
+subdirectory, and individual skills live inside it:
+
 ```
 skills/
-  {skill-name}/           # kebab-case directory name
-    SKILL.md              # Required: frontmatter + instructions
-    references/           # Optional: detailed reference docs
-      {topic}.md
-    rules/                # Optional: modular rule files
-      {rule-name}.md
-    evals/                # Optional: test cases
-      evals.json
-    scripts/              # Optional: executable scripts
-      {script-name}.sh
+  {category}/             # e.g. typescript, python, go, web, devops
+    {skill-name}/         # kebab-case skill name
+      SKILL.md            # Required: frontmatter + instructions
+      references/         # Optional: detailed reference docs
+        {topic}.md
+      rules/              # Optional: modular rule files
+        {rule-name}.md
+      evals/              # Optional: test cases
+        evals.json
+      scripts/            # Optional: executable scripts
+        {script-name}.sh
 ```
 
 ### SKILL.md Frontmatter
 
 ```yaml
 ---
-name: {skill-name}          # kebab-case, max 64 chars, must match directory name
-description: >              # max 1024 chars, no angle brackets
+name: { skill-name } # kebab-case, max 64 chars, must match the skill directory name (not the language directory)
+description: > # max 1024 chars, no angle brackets
   One or more sentences describing what the skill does and when to trigger it.
   Include example trigger phrases.
 license: MIT
@@ -56,11 +60,12 @@ Allowed frontmatter keys: `name`, `description`, `license`, `allowed-tools`,
 ### Validation
 
 ```bash
-python3 -m scripts.quick_validate /path/to/skills/{skill-name}
+python3 -m scripts.quick_validate /path/to/skills/{category}/{skill-name}
 ```
 
 ## Naming Conventions
 
+- Category directory: `kebab-case` (e.g., `typescript`, `python`, `web`, `devops`)
 - Skill directory: `kebab-case` (e.g., `functional-typescript`, `react-patterns`)
 - `SKILL.md`: always uppercase, always this exact name
 - Reference files: `kebab-case.md`
@@ -69,8 +74,9 @@ python3 -m scripts.quick_validate /path/to/skills/{skill-name}
 
 ## Commits
 
-Follow conventional commits. All commits to `main` trigger semantic-release:
+Follow conventional commits. Use the skill name (not the language) as the scope.
+All commits to `main` trigger semantic-release:
 
-- `feat(skill-name): ...` → minor release
-- `fix(skill-name): ...` → patch release
+- `feat(functional-typescript): ...` → minor release
+- `fix(functional-typescript): ...` → patch release
 - Breaking change footer → major release

@@ -16,7 +16,7 @@ by Kyle Simpson for deep JS foundations, extended with TypeScript-specific types
 ## Contents
 
 ```
-functional-typescript/
+skills/typescript/functional-typescript/
 ├── SKILL.md                                   ← main instructions
 └── references/
     ├── closures-and-partial-application.md    ← closures, partial application, currying, memoization

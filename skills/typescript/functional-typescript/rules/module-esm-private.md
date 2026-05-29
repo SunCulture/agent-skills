@@ -15,9 +15,9 @@ In ES modules (and TypeScript), every file is a module. Unexported identifiers a
 
 ```typescript
 // user-store.ts
-export let users: User[] = []          // mutable, public — anyone can replace it
+export let users: User[] = []; // mutable, public — anyone can replace it
 export function addUser(u: User) {
-  users.push(u)                        // mutation
+  users.push(u); // mutation
 }
 ```
 
@@ -25,25 +25,25 @@ export function addUser(u: User) {
 
 ```typescript
 // user-store.ts
-const users: User[] = []              // private to this module
+const users: User[] = []; // private to this module
 
 export function addUser(user: User): void {
-  users.push({ ...user })             // store a copy
+  users.push({ ...user }); // store a copy
 }
 
 export function getUsers(): readonly User[] {
-  return users                        // readonly — callers cannot mutate
+  return users; // readonly — callers cannot mutate
 }
 
 export function findUser(id: string): User | undefined {
-  return users.find(u => u.id === id)
+  return users.find((u) => u.id === id);
 }
 
 export function removeUser(id: string): boolean {
-  const index = users.findIndex(u => u.id === id)
-  if (index === -1) return false
-  users.splice(index, 1)
-  return true
+  const index = users.findIndex((u) => u.id === id);
+  if (index === -1) return false;
+  users.splice(index, 1);
+  return true;
 }
 ```
 
@@ -51,14 +51,14 @@ export function removeUser(id: string): boolean {
 
 ```typescript
 // api-client.ts
-export const BASE_URL = 'https://api.example.com'   // internal detail — leaks
+export const BASE_URL = "https://api.example.com"; // internal detail — leaks
 
 export function buildUrl(path: string): string {
-  return `${BASE_URL}${path}`
+  return `${BASE_URL}${path}`;
 }
 
 export async function get(path: string) {
-  return fetch(buildUrl(path))
+  return fetch(buildUrl(path));
 }
 ```
 
@@ -66,26 +66,26 @@ export async function get(path: string) {
 
 ```typescript
 // api-client.ts
-const BASE_URL = 'https://api.example.com'          // private
+const BASE_URL = "https://api.example.com"; // private
 
 function buildUrl(path: string): string {
-  return `${BASE_URL}${path}`
+  return `${BASE_URL}${path}`;
 }
 
 export async function get<T>(path: string): Promise<T> {
-  const res = await fetch(buildUrl(path))
-  if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`)
-  return res.json() as Promise<T>
+  const res = await fetch(buildUrl(path));
+  if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
+  return res.json() as Promise<T>;
 }
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(buildUrl(path), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
-  })
-  if (!res.ok) throw new Error(`POST ${path} failed: ${res.status}`)
-  return res.json() as Promise<T>
+  });
+  if (!res.ok) throw new Error(`POST ${path} failed: ${res.status}`);
+  return res.json() as Promise<T>;
 }
 ```
 
@@ -93,8 +93,8 @@ export async function post<T>(path: string, body: unknown): Promise<T> {
 
 ```typescript
 // features/users/index.ts  — public API barrel (intentional, not for tree-shaking)
-export { getUsers, addUser, findUser, removeUser } from './user-store'
-export type { User } from './types'
+export { getUsers, addUser, findUser, removeUser } from "./user-store";
+export type { User } from "./types";
 // Does NOT export UserStore implementation details
 ```
 

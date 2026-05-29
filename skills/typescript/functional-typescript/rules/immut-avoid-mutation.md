@@ -15,8 +15,8 @@ Mutating a function's arguments or variables from an outer scope creates invisib
 
 ```typescript
 function addItem(cart: CartItem[], item: CartItem): CartItem[] {
-  cart.push(item) // mutates caller's array
-  return cart
+  cart.push(item); // mutates caller's array
+  return cart;
 }
 ```
 
@@ -24,7 +24,7 @@ function addItem(cart: CartItem[], item: CartItem): CartItem[] {
 
 ```typescript
 function addItem(cart: readonly CartItem[], item: CartItem): CartItem[] {
-  return [...cart, item]
+  return [...cart, item];
 }
 ```
 
@@ -32,8 +32,8 @@ function addItem(cart: readonly CartItem[], item: CartItem): CartItem[] {
 
 ```typescript
 function applyDiscount(order: Order, percent: number): Order {
-  order.total = order.total * (1 - percent / 100) // mutates input
-  return order
+  order.total = order.total * (1 - percent / 100); // mutates input
+  return order;
 }
 ```
 
@@ -41,16 +41,20 @@ function applyDiscount(order: Order, percent: number): Order {
 
 ```typescript
 function applyDiscount(order: Readonly<Order>, percent: number): Order {
-  return { ...order, total: order.total * (1 - percent / 100) }
+  return { ...order, total: order.total * (1 - percent / 100) };
 }
 ```
 
 **Incorrect (mutates deeply nested state):**
 
 ```typescript
-function updateUserCity(state: AppState, userId: string, city: string): AppState {
-  state.users[userId].address.city = city // deep mutation
-  return state
+function updateUserCity(
+  state: AppState,
+  userId: string,
+  city: string,
+): AppState {
+  state.users[userId].address.city = city; // deep mutation
+  return state;
 }
 ```
 
@@ -60,7 +64,7 @@ function updateUserCity(state: AppState, userId: string, city: string): AppState
 function updateUserCity(
   state: Readonly<AppState>,
   userId: string,
-  city: string
+  city: string,
 ): AppState {
   return {
     ...state,
@@ -71,7 +75,7 @@ function updateUserCity(
         address: { ...state.users[userId].address, city },
       },
     },
-  }
+  };
 }
 ```
 

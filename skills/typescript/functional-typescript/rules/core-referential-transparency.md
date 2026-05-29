@@ -15,7 +15,7 @@ A function call is referentially transparent if you can replace it with its retu
 
 ```typescript
 function isExpired(expiryTimestamp: number): boolean {
-  return Date.now() > expiryTimestamp // hidden dependency on wall clock
+  return Date.now() > expiryTimestamp; // hidden dependency on wall clock
 }
 
 // Cannot be memoized or tested deterministically
@@ -26,15 +26,15 @@ function isExpired(expiryTimestamp: number): boolean {
 
 ```typescript
 function isExpired(expiryTimestamp: number, now: number): boolean {
-  return now > expiryTimestamp
+  return now > expiryTimestamp;
 }
 
 // Testable:
-isExpired(1000, 500)  // false — always
-isExpired(1000, 2000) // true  — always
+isExpired(1000, 500); // false — always
+isExpired(1000, 2000); // true  — always
 
 // Production usage:
-isExpired(token.exp, Date.now())
+isExpired(token.exp, Date.now());
 ```
 
 **Incorrect (hidden output — mutates input):**
@@ -42,9 +42,9 @@ isExpired(token.exp, Date.now())
 ```typescript
 function normaliseItems(items: Item[]): Item[] {
   for (const item of items) {
-    item.name = item.name.trim() // mutates caller's array
+    item.name = item.name.trim(); // mutates caller's array
   }
-  return items
+  return items;
 }
 ```
 
@@ -52,7 +52,7 @@ function normaliseItems(items: Item[]): Item[] {
 
 ```typescript
 function normaliseItems(items: readonly Item[]): Item[] {
-  return items.map(item => ({ ...item, name: item.name.trim() }))
+  return items.map((item) => ({ ...item, name: item.name.trim() }));
 }
 ```
 
@@ -61,28 +61,28 @@ function normaliseItems(items: readonly Item[]): Item[] {
 ```typescript
 function assignTeam(users: string[]): Record<string, string> {
   return Object.fromEntries(
-    users.map(u => [u, Math.random() > 0.5 ? 'red' : 'blue'])
-  )
+    users.map((u) => [u, Math.random() > 0.5 ? "red" : "blue"]),
+  );
 }
 ```
 
 **Correct (inject randomness as a parameter):**
 
 ```typescript
-type RNG = () => number
+type RNG = () => number;
 
 function assignTeam(
   users: readonly string[],
-  rng: RNG = Math.random
+  rng: RNG = Math.random,
 ): Record<string, string> {
   return Object.fromEntries(
-    users.map(u => [u, rng() > 0.5 ? 'red' : 'blue'])
-  )
+    users.map((u) => [u, rng() > 0.5 ? "red" : "blue"]),
+  );
 }
 
 // Deterministic test:
-const seededRng = () => 0.3
-assignTeam(['Alice', 'Bob'], seededRng) // always { Alice: 'blue', Bob: 'blue' }
+const seededRng = () => 0.3;
+assignTeam(["Alice", "Bob"], seededRng); // always { Alice: 'blue', Bob: 'blue' }
 ```
 
 Reference: [Wikipedia — Referential Transparency](https://en.wikipedia.org/wiki/Referential_transparency)

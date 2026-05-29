@@ -15,15 +15,15 @@ tags: immutability, typescript, as-const, literal-types, enums
 
 ```typescript
 const DIRECTION = {
-  UP: 'up',
-  DOWN: 'down',
-  LEFT: 'left',
-  RIGHT: 'right',
-}
+  UP: "up",
+  DOWN: "down",
+  LEFT: "left",
+  RIGHT: "right",
+};
 // type of DIRECTION.UP is `string`, not `"up"`
 // DIRECTION.UP = 'other' // silently allowed
 
-type Direction = typeof DIRECTION[keyof typeof DIRECTION]
+type Direction = (typeof DIRECTION)[keyof typeof DIRECTION];
 // Direction = string — useless
 ```
 
@@ -31,35 +31,35 @@ type Direction = typeof DIRECTION[keyof typeof DIRECTION]
 
 ```typescript
 const DIRECTION = {
-  UP:    'up',
-  DOWN:  'down',
-  LEFT:  'left',
-  RIGHT: 'right',
-} as const
+  UP: "up",
+  DOWN: "down",
+  LEFT: "left",
+  RIGHT: "right",
+} as const;
 
 // DIRECTION.UP = 'other' // TS error: Cannot assign to 'UP' (readonly)
 
-type Direction = typeof DIRECTION[keyof typeof DIRECTION]
+type Direction = (typeof DIRECTION)[keyof typeof DIRECTION];
 // Direction = "up" | "down" | "left" | "right" — precise
 ```
 
 **Incorrect (array loses element types):**
 
 ```typescript
-const ROLES = ['admin', 'viewer', 'editor']
-type Role = typeof ROLES[number]
+const ROLES = ["admin", "viewer", "editor"];
+type Role = (typeof ROLES)[number];
 // Role = string — widened, loses the literals
 ```
 
 **Correct (array tuple with `as const`):**
 
 ```typescript
-const ROLES = ['admin', 'viewer', 'editor'] as const
-type Role = typeof ROLES[number]
+const ROLES = ["admin", "viewer", "editor"] as const;
+type Role = (typeof ROLES)[number];
 // Role = "admin" | "viewer" | "editor"
 
 function hasRole(role: string): role is Role {
-  return (ROLES as readonly string[]).includes(role)
+  return (ROLES as readonly string[]).includes(role);
 }
 ```
 
@@ -68,17 +68,17 @@ function hasRole(role: string): role is Role {
 ```typescript
 // Avoid: enum generates runtime code and has surprising behaviour
 enum Status {
-  Active = 'active',
-  Inactive = 'inactive',
+  Active = "active",
+  Inactive = "inactive",
 }
 
 // Prefer: as const + type alias
 const Status = {
-  Active:   'active',
-  Inactive: 'inactive',
-} as const
+  Active: "active",
+  Inactive: "inactive",
+} as const;
 
-type Status = typeof Status[keyof typeof Status]
+type Status = (typeof Status)[keyof typeof Status];
 // "active" | "inactive"
 ```
 

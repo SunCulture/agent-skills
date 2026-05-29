@@ -17,16 +17,16 @@ This makes the core independently testable with no mocks, and the shell easy to 
 
 ```typescript
 async function syncUsers(apiUrl: string): Promise<void> {
-  const response = await fetch(apiUrl)          // side effect
-  const data = await response.json()            // side effect
+  const response = await fetch(apiUrl); // side effect
+  const data = await response.json(); // side effect
 
   const users = data.users
     .filter((u: any) => u.active)
-    .map((u: any) => ({ id: u.id, name: u.name.trim() }))
+    .map((u: any) => ({ id: u.id, name: u.name.trim() }));
 
   for (const user of users) {
-    await db.upsert('users', user)              // side effect inside loop
-    console.log(`synced: ${user.id}`)           // side effect inside loop
+    await db.upsert("users", user); // side effect inside loop
+    console.log(`synced: ${user.id}`); // side effect inside loop
   }
 }
 // Untestable without mocking fetch and db
@@ -36,33 +36,35 @@ async function syncUsers(apiUrl: string): Promise<void> {
 
 ```typescript
 // Pure core — zero side effects, fully testable
-type RawUser = { id: string; name: string; active: boolean }
-type User    = { id: string; name: string }
+type RawUser = { id: string; name: string; active: boolean };
+type User = { id: string; name: string };
 
 function selectActiveUsers(rawUsers: readonly RawUser[]): User[] {
   return rawUsers
-    .filter(u => u.active)
-    .map(u => ({ id: u.id, name: u.name.trim() }))
+    .filter((u) => u.active)
+    .map((u) => ({ id: u.id, name: u.name.trim() }));
 }
 
 // Impure shell — side effects only, no logic
 async function syncUsers(apiUrl: string): Promise<void> {
-  const response = await fetch(apiUrl)
-  const { users: rawUsers } = await response.json()
+  const response = await fetch(apiUrl);
+  const { users: rawUsers } = await response.json();
 
-  const users = selectActiveUsers(rawUsers)   // call pure core
+  const users = selectActiveUsers(rawUsers); // call pure core
 
   for (const user of users) {
-    await db.upsert('users', user)
-    console.log(`synced: ${user.id}`)
+    await db.upsert("users", user);
+    console.log(`synced: ${user.id}`);
   }
 }
 
 // Test the core without any mocks:
-expect(selectActiveUsers([
-  { id: '1', name: ' Alice ', active: true },
-  { id: '2', name: 'Bob',    active: false },
-])).toEqual([{ id: '1', name: 'Alice' }])
+expect(
+  selectActiveUsers([
+    { id: "1", name: " Alice ", active: true },
+    { id: "2", name: "Bob", active: false },
+  ]),
+).toEqual([{ id: "1", name: "Alice" }]);
 ```
 
 Reference: [Destroy All Software — Boundaries](https://www.destroyallsoftware.com/talks/boundaries)
