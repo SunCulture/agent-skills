@@ -27,7 +27,6 @@ Agents are grouped by where they sit in the delivery lifecycle.
 | Agent | Specialty |
 | --- | --- |
 | [`fullstack-engineer`](fullstack-engineer.md) | Principal-level fullstack build, refactor, and debug across Go, Python, .NET, TypeScript, mobile, and infra. |
-| [`senior-software-engineer`](senior-software-engineer.md) | Generalist senior engineer across backend, frontend, DevOps, and system architecture. |
 | [`data-engineering`](data-engineering.md) | ETL/ELT, warehouses & lakehouses, streaming, CDC, data quality, MLOps, vector DBs, RAG. |
 | [`machine-learning`](machine-learning.md) | Model selection, training, fine-tuning (LoRA/QLoRA/RLHF), evaluation, quantisation, governance. |
 
@@ -58,12 +57,6 @@ Agents are grouped by where they sit in the delivery lifecycle.
 | [`customer-success`](customer-success.md) | Customer success & support ops, SLAs, health scoring, churn/retention, voice-of-customer. |
 | [`agent-orchestrator`](agent-orchestrator.md) | Meta-orchestrator and routing across the roster — delegation plans, handoffs, conflict resolution. |
 
-### Multi-agent studio
-
-| File | Specialty |
-| --- | --- |
-| [`game-development-studio`](game-development-studio.md) | A complete game-studio crew as a single orchestration doc — concept → vertical slice → polish → ship. Contains its own internal specialists; not a standard single subagent. |
-
 ## Naming
 
 Files were renamed from internal codenames to their handled specialty:
@@ -88,8 +81,6 @@ Files were renamed from internal codenames to their handled specialty:
 | `project-management` | tasksmith |
 | `quality-assurance` | touchstone |
 | `code-reviewer` | whetstone |
-| `senior-software-engineer` | senior-principle-software-engineer |
-| `game-development-studio` | pixelforge |
 
 ## Installation
 
