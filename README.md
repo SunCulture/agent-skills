@@ -7,6 +7,10 @@ knowledge and patterns.
 Skills follow the [Agent Skills](https://agentskills.io/) format and work with
 Claude Code, Cursor, Copilot, and other AI coding agents.
 
+This repo also ships a roster of specialist **[agents](agents/)** — subagents
+named for the speciality they handle (architecture, security, SRE, code review,
+and more). See [`agents/README.md`](agents/README.md) for the full roster.
+
 ## Available Skills
 
 ### `typescript/`
@@ -75,6 +79,18 @@ application, service, API, worker, frontend, mobile app, or infra config.
 
 ```bash
 npx skills add https://github.com/SunCulture/agent-skills --skill fullstack-engineering
+```
+
+## Agents
+
+Specialist subagents live under [`agents/`](agents/), one `.md` file per
+speciality. They follow the Claude Code subagent format (frontmatter + operating
+instructions) and are auto-discovered when copied into an agent directory. The
+full roster, lifecycle grouping, and the codename → speciality mapping are
+documented in [`agents/README.md`](agents/README.md).
+
+```bash
+cp agents/<speciality>.md ~/.claude/agents/
 ```
 
 ## Skill Structure
