@@ -58,6 +58,25 @@ code review together.
 npx skills add https://github.com/SunCulture/agent-skills --skill deslop-and-review
 ```
 
+### `engineering/`
+
+#### `fullstack-engineering` · [view](https://github.com/SunCulture/agent-skills/tree/main/skills/engineering/fullstack-engineering)
+
+Principal-level fullstack engineering patterns across stacks — Golang (Bun ORM,
+BunRouter, adapter pattern), Python (hexagonal, FastAPI, SQLAlchemy 2.0),
+C#/.NET (clean architecture, EF Core), TypeScript/Node.js, Next.js, Nuxt.js,
+React, Vue, React Native, Kotlin, Swift, plus queues, databases, and infra.
+Enforces SOLID/SRP, UUIDv7 primary keys, structured logging, OpenTelemetry
+tracing, health/readiness probes, graceful shutdown, multi-stage non-root
+Dockerfiles, real test coverage, and Makefiles in every output.
+
+**Use when** writing, reviewing, debugging, refactoring, or scaffolding any
+application, service, API, worker, frontend, mobile app, or infra config.
+
+```bash
+npx skills add https://github.com/SunCulture/agent-skills --skill fullstack-engineering
+```
+
 ## Skill Structure
 
 Skills are organised by category. Each skill lives under `skills/{category}/`
