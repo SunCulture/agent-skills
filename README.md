@@ -7,6 +7,10 @@ knowledge and patterns.
 Skills follow the [Agent Skills](https://agentskills.io/) format and work with
 Claude Code, Cursor, Copilot, and other AI coding agents.
 
+This repo also ships a roster of specialist **[agents](agents/)** — subagents
+named for the speciality they handle (architecture, security, SRE, code review,
+and more). See [`agents/README.md`](agents/README.md) for the full roster.
+
 ## Available Skills
 
 ### `typescript/`
@@ -56,6 +60,37 @@ code review together.
 
 ```bash
 npx skills add https://github.com/SunCulture/agent-skills --skill deslop-and-review
+```
+
+### `engineering/`
+
+#### `fullstack-engineering` · [view](https://github.com/SunCulture/agent-skills/tree/main/skills/engineering/fullstack-engineering)
+
+Principal-level fullstack engineering patterns across stacks — Golang (Bun ORM,
+BunRouter, adapter pattern), Python (hexagonal, FastAPI, SQLAlchemy 2.0),
+C#/.NET (clean architecture, EF Core), TypeScript/Node.js, Next.js, Nuxt.js,
+React, Vue, React Native, Kotlin, Swift, plus queues, databases, and infra.
+Enforces SOLID/SRP, UUIDv7 primary keys, structured logging, OpenTelemetry
+tracing, health/readiness probes, graceful shutdown, multi-stage non-root
+Dockerfiles, real test coverage, and Makefiles in every output.
+
+**Use when** writing, reviewing, debugging, refactoring, or scaffolding any
+application, service, API, worker, frontend, mobile app, or infra config.
+
+```bash
+npx skills add https://github.com/SunCulture/agent-skills --skill fullstack-engineering
+```
+
+## Agents
+
+Specialist subagents live under [`agents/`](agents/), one `.md` file per
+speciality. They follow the Claude Code subagent format (frontmatter + operating
+instructions) and are auto-discovered when copied into an agent directory. The
+full roster, lifecycle grouping, and the codename → speciality mapping are
+documented in [`agents/README.md`](agents/README.md).
+
+```bash
+cp agents/<speciality>.md ~/.claude/agents/
 ```
 
 ## Skill Structure
