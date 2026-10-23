@@ -40,7 +40,7 @@ commits inside often say nothing about it. A three-pass search is required:
 **Pass A — commit message grep:**
 
 ```
-git log --all --oneline --grep="<TICKET>" -i
+git log --branches --remotes --oneline --grep="<TICKET>" -i
 ```
 
 **Pass B — branch name search:**
@@ -49,16 +49,21 @@ git log --all --oneline --grep="<TICKET>" -i
 git branch -a | grep -i "<TICKET>"
 ```
 
-For every matching branch, collect commits not yet on the release target:
+For every matching branch, collect the branch's own commits, measured against
+the **source** branch (e.g. `origin/stage`), not the release target. A branch
+cut from the source can look hundreds of commits "ahead" of a target that has
+diverged from it, which floods the list with unrelated work; Step 2 decides
+what is already on the target. Skip `release/*` branches and the branch you are
+building:
 
 ```
-git log origin/<base-branch>..<branch> --oneline   # unmerged commits
+git log origin/<source-branch>..<branch> --oneline   # commits not yet on the source
 ```
 
 If a branch is already merged, find its merge commit:
 
 ```
-git log --all --oneline --merges | xargs -I{} git log -1 --format="%H %s" {} | grep -i "<TICKET>"
+git log --branches --remotes --oneline --merges | xargs -I{} git log -1 --format="%H %s" {} | grep -i "<TICKET>"
 ```
 
 Then expand it: `git log <merge>^1..<merge>^2 --oneline`
@@ -93,7 +98,7 @@ Rules that apply to every pass:
   `git log <merge>^1..<merge>^2 --oneline`. Never cherry-pick the merge
   commit itself.
 - **For each branch found**: collect every commit on that branch not yet on
-  the release target with `git log origin/<base>..<branch> --oneline`. If the
+  the source branch with `git log origin/<source>..<branch> --oneline`. If the
   branch was already merged, find its merge commit and expand that instead.
 - Do not stop after finding one PR or one branch for a ticket. Run all passes
   to completion and union every commit found before moving on.
@@ -108,6 +113,16 @@ Rules that apply to every pass:
 - **Keep a ledger** per ticket: every resolved SHA, which pass found it, and
   later its outcome (picked / already on target / equivalent patch / dropped
   with a reason). The completion audit in section 3 depends on it.
+- **Ignore non-work and promotions.** `git stash` entries (subjects starting
+  `index on` or `WIP on`) are not commits to pick. Promotion and squash commits
+  or PRs such as `Promote Develop to Stage`, `Merge develop to stage` and
+  `chore(stage): promote …` bundle unrelated work: do not pick or expand them,
+  and do not expand any PR whose base is the source branch. The ticket's own
+  commits are picked individually, so record the promotion in the ledger as
+  dropped (promotion).
+- **Shared PRs.** A PR whose body names several tickets (an epic or batch PR)
+  is expanded once and its commits are credited to every ticket it names.
+  Count each SHA once in totals.
 
 ## 2. Check for already-applied work
 
