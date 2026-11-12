@@ -64,7 +64,7 @@ npx skills add https://github.com/SunCulture/agent-skills --skill deslop-and-rev
 
 #### `release` · [view](https://github.com/SunCulture/agent-skills/tree/main/skills/devops/release)
 
-Cherry-pick a set of tickets from stage onto a release branch, verify with lint, build and tests, open a release PR, then tag and publish a GitHub release. Resolves each ticket to every commit across commit messages, branch names and PR titles, skips work already on the target, and stops to ask on large or ambiguous conflicts.
+Cherry-pick a set of tickets from stage onto a release branch, verify with lint, build and tests, open a release PR, then tag and publish a GitHub release. Adds each ticket's Jira subtasks to the list, resolves every ticket to every commit across commit messages, branch names and PR titles, skips work already on the target, and stops to ask on large or ambiguous conflicts.
 
 **Use when** cutting a release, cherry-picking tickets onto a release branch, or releasing a named version (e.g. v3.2.11).
 
