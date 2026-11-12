@@ -1,9 +1,10 @@
 ---
 name: release
 description: >
-  Cherry-pick a set of tickets from stage (or another source branch/commit)
-  onto a release branch, verify with lint/test/build, open a release PR, then
-  tag and publish a GitHub release. Use when the user says "make a release",
+  Cherry-pick a set of tickets, plus their Jira subtasks, from stage (or another
+  source branch/commit) onto a release branch, verify with lint/test/build,
+  open a release PR, then tag and publish a GitHub release. Use when the user
+  says "make a release",
   "cut a release", "cherry-pick these tickets onto the release branch", or names
   a version to release (e.g. "release v3.2.11").
 license: MIT
@@ -24,14 +25,45 @@ metadata:
 Arguments passed: `$ARGUMENTS` — expected to contain some combination of:
 
 - a release/target branch name (or "current branch" if already checked out)
-- a list of ticket IDs (e.g. `RETAIL-706 RETAIL-687 RETAIL-710`)
+- a list of ticket IDs (e.g. `RETAIL-706 RETAIL-687 RETAIL-710`); each ticket's
+  Jira subtasks are looked up and added automatically (section 1)
 - optionally one or more explicit commit SHAs to include regardless of ticket
 - optionally a version number for the tag/release (e.g. `v3.2.11`)
 
 If any of these are missing or ambiguous, ask rather than guess — this skill
 makes real commits and opens real PRs/releases.
 
-## 1. Resolve tickets to commits
+## 1. Expand subtasks
+
+A story's subtasks have keys of their own (e.g. `RETAIL-1130`) and often carry
+their own branches and PRs, so look them up before searching for commits. Use
+the Atlassian/Jira MCP tools.
+
+1. Get the site with `getAccessibleAtlassianResources`, then fetch every named
+   ticket in one call with `searchJiraIssuesUsingJql`:
+   ```
+   key in (<TICKET>, <TICKET>, ...)   # fields: summary, status, issuetype, subtasks
+   ```
+   The `subtasks` field of each result lists that ticket's subtasks (key,
+   summary, status). An empty list is normal; accept it.
+2. Include every subtask whatever its status, and note the status in the list.
+   Do not add a subtask the user already named.
+3. **Epics.** A ticket whose `issuetype` is Epic has child stories, not subtasks.
+   Do not add those silently: tell the user and ask whether to include them.
+4. Show the user the expanded list, one line per subtask with its key, summary,
+   status and parent, and use it as the ticket list for the rest of the run.
+5. A subtask is a ticket like any other: it gets its own ledger entry and goes
+   through the passes in section 2, the already-applied check and the
+   completion audit. A SHA that matches both a subtask and its parent is one
+   SHA credited to both.
+6. **Zero matches for a subtask do not stop the run.** Parents usually carry the
+   work, so record "no commits of its own" in the ledger and the PR body and
+   carry on. The ask-on-zero-matches rule in section 2 applies only to tickets
+   the user named.
+7. If Jira cannot be reached (MCP not connected, not authenticated), say so and
+   ask whether to continue without the subtask check. Never skip it silently.
+
+## 2. Resolve tickets to commits
 
 `git log --grep` only matches commit message bodies. Most feature branches
 name the ticket in the **branch name** or **PR title** — the individual
@@ -52,7 +84,7 @@ git branch -a | grep -i "<TICKET>"
 For every matching branch, collect the branch's own commits, measured against
 the **source** branch (e.g. `origin/stage`), not the release target. A branch
 cut from the source can look hundreds of commits "ahead" of a target that has
-diverged from it, which floods the list with unrelated work; Step 2 decides
+diverged from it, which floods the list with unrelated work; section 3 decides
 what is already on the target. Skip `release/*` branches and the branch you are
 building:
 
@@ -102,9 +134,11 @@ Rules that apply to every pass:
   branch was already merged, find its merge commit and expand that instead.
 - Do not stop after finding one PR or one branch for a ticket. Run all passes
   to completion and union every commit found before moving on.
-- If a ticket has **zero matches** in all three passes, do not invent a
-  commit or silently skip it. Tell the user it wasn't found and ask how to
-  proceed (they may supply the right PR/branch/SHA, or say to skip it).
+- If a ticket the user named has **zero matches** in all three passes, do not
+  invent a commit or silently skip it. Tell the user it wasn't found and ask
+  how to proceed (they may supply the right PR/branch/SHA, or say to skip it).
+  A subtask added by section 1 is the exception: record it as having no commits
+  of its own and move on.
 - If the user supplied an explicit commit SHA directly, include it as-is
   alongside whatever the search finds.
 - **Deduplicate by SHA** once the passes are unioned. The same commit often
@@ -112,7 +146,8 @@ Rules that apply to every pass:
   SHA, record every ticket it satisfies, and never cherry-pick a SHA twice.
 - **Keep a ledger** per ticket: every resolved SHA, which pass found it, and
   later its outcome (picked / already on target / equivalent patch / dropped
-  with a reason). The completion audit in section 3 depends on it.
+  with a reason). Subtasks get their own entries, grouped under their parent.
+  The completion audit in section 4 depends on it.
 - **Ignore non-work and promotions.** `git stash` entries (subjects starting
   `index on` or `WIP on`) are not commits to pick. Promotion and squash commits
   or PRs such as `Promote Develop to Stage`, `Merge develop to stage` and
@@ -124,7 +159,7 @@ Rules that apply to every pass:
   is expanded once and its commits are credited to every ticket it names.
   Count each SHA once in totals.
 
-## 2. Check for already-applied work
+## 3. Check for already-applied work
 
 Before cherry-picking anything, for every resolved commit run:
 
@@ -161,7 +196,7 @@ An empty diff proves it's a no-op. Report which tickets are no-ops and skip
 cherry-picking them (don't create empty commits unless the user asks for an
 explicit record of having picked them).
 
-## 3. Cherry-pick in chronological order
+## 4. Cherry-pick in chronological order
 
 Sort **all** resolved, non-ancestor commits by commit date across every
 ticket (not per-ticket in isolation — interleave them), then:
@@ -192,7 +227,7 @@ on to Verify, and do not report the release as complete, until every ticket
 has a full ledger. End the run with a table per ticket of SHAs found, picked,
 already present and dropped, and carry it into the PR body.
 
-## 4. Conflict resolution policy
+## 5. Conflict resolution policy
 
 - **Default**: on a plain textual conflict, keep the incoming (cherry-picked)
   side — it represents the newer/intended change.
@@ -226,7 +261,7 @@ already present and dropped, and carry it into the PR body.
   the source branch (e.g. `git diff HEAD origin/<source-branch> -- <path>`)
   to confirm it still matches before moving to the next commit.
 
-## 5. Verify
+## 6. Verify
 
 Run, in order: `npm run lint`, `npm run build`, `npm test`.
 
@@ -244,7 +279,7 @@ any given release:
   missing native binding (e.g. `sqlite3`) or other local-environment issue
   is not the same as a real regression from the cherry-picked code.
 
-## 6. Push and open the PR
+## 7. Push and open the PR
 
 - `git push -u origin <branch> --no-verify` (hooks skipped by default).
 - Look for `.github/PULL_REQUEST_TEMPLATE.md` (or lowercase variant) and
@@ -257,12 +292,13 @@ any given release:
   in terms of what changed for someone using the product, not ticket IDs or
   implementation details. This is the release-specific default — it differs
   from `/commit-and-create-pr`'s more technical PR body.
-- Note any no-op tickets, not-found tickets and replayed prerequisite commits
-  in the PR body so reviewers know they were considered, and include the
-  ledger summary table from the completion audit.
+- Note any no-op tickets, not-found tickets, subtasks added from Jira (and any
+  with no commits of their own) and replayed prerequisite commits in the PR
+  body so reviewers know they were considered, and include the ledger summary
+  table from the completion audit, with subtasks listed under their parent.
 - Return the PR URL to the user.
 
-## 7. Tag + GitHub release
+## 8. Tag + GitHub release
 
 - Look up the most recent release to copy its exact format before creating
   a new one:
@@ -275,7 +311,7 @@ any given release:
   `v<version>`, body with a `## What's new` section of plain-language
   bullets and a `## Notes` line confirming build/lint checks ran clean).
 - Ask the user which commit the tag should point to — the release branch's
-  tip, or the base branch's tip (this depends on whether the PR from step 6
+  tip, or the base branch's tip (this depends on whether the PR from section 7
   has merged yet; don't assume).
 - Create and push the tag:
   ```
